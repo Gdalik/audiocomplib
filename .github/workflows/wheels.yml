@@ -31,6 +31,7 @@ jobs:
           python -m pip install "numpy>=2"
           python -m pip install cibuildwheel==2.22.0
           python -m pip install cython
+          python -m pip install setuptools  # Install setuptools
 
       # Build Cython extensions before wheels
       - name: Build Cython extensions
