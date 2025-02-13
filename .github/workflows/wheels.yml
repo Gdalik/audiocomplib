@@ -10,7 +10,9 @@ jobs:
       matrix:
         #os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
         os: [ubuntu-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        cibw-build: ['pp39-manylinux_i686']
+        #python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9']
 
     steps:
       - uses: actions/checkout@v4
