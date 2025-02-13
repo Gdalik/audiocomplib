@@ -10,7 +10,7 @@ jobs:
       matrix:
         #os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
         os: [ubuntu-latest]
-        arch: [x86_64]  # Only 64-bit architecture
+        arch: [amd64]  # Only 64-bit architecture
         #python-version: ['3.9', '3.10', '3.11', '3.12']
         python-version: ['3.9']
 
