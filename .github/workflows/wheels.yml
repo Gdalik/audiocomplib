@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12']  # Including Python 3.12
 
     steps:
       - uses: actions/checkout@v4
@@ -16,7 +17,7 @@ jobs:
       # Set up Python environment
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
 
       # Install build dependencies
       - name: Install dependencies
@@ -24,11 +25,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install "numpy>=2"
           python -m pip install cibuildwheel==2.22.0
-
-      # Disable AVX2 in NumPy for Ubuntu to avoid build issues
-      - name: Disable AVX2 in NumPy (Ubuntu only)
-        if: contains(matrix.os, 'ubuntu')
-        run: echo "NPY_DISABLE_CPU_FEATURES=AVX2" >> $GITHUB_ENV
 
       # Build the wheels using cibuildwheel
       - name: Build wheels
