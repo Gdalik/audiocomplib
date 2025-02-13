@@ -2,6 +2,7 @@ from setuptools import setup, Extension
 from Cython.Build import cythonize
 import numpy
 
+# Define the Cython extensions
 extensions = [
     Extension(
         "audiocomplib.apply_gain_reduction",
@@ -10,7 +11,9 @@ extensions = [
     )
 ]
 
+# Use cythonize to compile the extensions and let setuptools handle the location
 setup(
     name="audiocomplib",
     ext_modules=cythonize(extensions),
+    zip_safe=False
 )
