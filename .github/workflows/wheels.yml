@@ -66,8 +66,8 @@ jobs:
           git clean -fdx
 
       # Compile Cython extensions locally (if applicable)
-      - name: Compile Cython extensions (setup.py)
-        run: python setup.py build_ext --inplace
+      #- name: Compile Cython extensions (setup.py)
+      #  run: python setup.py build_ext --inplace
 
       # Build the wheels using cibuildwheel
       - name: Build wheels
