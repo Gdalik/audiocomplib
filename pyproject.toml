@@ -11,6 +11,8 @@ build-backend = "setuptools.build_meta"
 name = "audiocomplib"
 version = "0.1.0"
 description = "A Python library for audio dynamic compression and limiting"
+long_description = "file: README.md"
+long_description_content_type = "text/markdown"
 authors = [{name = "Gdaliy Garmiza", email = "gdalik@gmail.com"}]
 maintainers = [{name = "Gdaliy Garmiza", email = "gdalik@gmail.com"}]
 license = {text = "MIT"}
@@ -27,5 +29,5 @@ package_data = { "*" = ["*.pyx", "*.pxd"] }
 test_suite = "tests"
 tests_require = ["pytest"]
 
-[extras]
+[tool.setuptools.optional-dependencies]
 dev = ["pytest", "sphinx"]
