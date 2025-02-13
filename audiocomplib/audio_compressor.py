@@ -103,7 +103,6 @@ class AudioCompressor:
 
         # Apply attack/release smoothing
         target_gain_reduction = np.where(max_amplitude != 0, desired_gain_reduction / max_amplitude, 1.0)
-
         gain_reduction = apply_gain_reduction(target_gain_reduction,
                                               attack_coeff, release_coeff)
 

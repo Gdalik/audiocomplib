@@ -92,3 +92,18 @@ class PeakLimiter:
         compressed_signal = input_signal * gain_reduction_smooth
 
         return compressed_signal
+
+    def get_gain_reduction(self) -> np.ndarray:
+        """
+        Retrieve the stored gain reduction values in dBFS.
+
+        Returns:
+        - gain_reduction_dbfs: numpy array with gain reduction values in dBFS
+        """
+        if self._gain_reduction is None:
+            raise ValueError("Gain reduction has not been calculated yet. Please process a signal first.")
+
+        # Convert linear scale gain reduction to dBFS for output
+        gain_reduction_dbfs = 20 * np.log10(self._gain_reduction)
+
+        return gain_reduction_dbfs
