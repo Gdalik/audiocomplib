@@ -4,7 +4,7 @@ import numpy
 
 extensions = [
     Extension(
-        "audiocomplib",
+        "audiocomplib.apply_gain_reduction",
         sources=["audiocomplib/apply_gain_reduction.pyx"],
         include_dirs=[numpy.get_include()]  # Include NumPy headers
     )
