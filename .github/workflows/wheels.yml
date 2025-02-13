@@ -34,6 +34,11 @@ jobs:
             Write-Host "No pip cache to clear"
           }
 
+      # Clean previous build files to avoid issues with Cython
+      - name: Clean build files
+        run: |
+          rm -rf build dist *.egg-info
+
       # Install build dependencies
       - name: Install dependencies
         run: |
