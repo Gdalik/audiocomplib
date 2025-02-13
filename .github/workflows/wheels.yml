@@ -31,9 +31,9 @@ jobs:
           python -m pip install cibuildwheel==2.22.0
           python -m pip install setuptools wheel cython
 
-      # Set CIBW_ARCHS to limit builds to only amd64 (64-bit)
-      - name: Set CIBW_ARCHS to amd64
-        run: echo "CIBW_ARCHS=amd64" >> $GITHUB_ENV
+      # Set CIBW_ARCHS to only build for x86_64 (64-bit)
+      - name: Set CIBW_ARCHS to x86_64
+        run: echo "CIBW_ARCHS=x86_64" >> $GITHUB_ENV
 
       # Clean up build files (Linux/macOS)
       - name: Clean up build files (Linux/macOS)
