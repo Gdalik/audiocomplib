@@ -24,11 +24,11 @@ jobs:
           python -m pip install --upgrade pip
 
           # Use Bash if on Linux/macOS
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "ubuntu-24.04-arm" || "${{ matrix.os }}" == "macos-13" || "${{ matrix.os }}" == "macos-latest" ]]; then
+          if ([[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "ubuntu-24.04-arm" || "${{ matrix.os }}" == "macos-13" || "${{ matrix.os }}" == "macos-latest" ]]); then
             python -m pip install numpy>=2
           
           # Use PowerShell syntax if on Windows
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          elif ([[ "${{ matrix.os }}" == "windows-latest" ]]); then
             powershell -Command "python -m pip install numpy>=2"
           fi
 
