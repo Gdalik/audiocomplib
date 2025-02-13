@@ -69,6 +69,13 @@ jobs:
       # Compile Cython extensions locally (if applicable)
       #- name: Compile Cython extensions (setup.py)
       #  run: python setup.py build_ext --inplace
+      
+      - name: Install build dependencies on Linux
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gfortran libopenblas-dev liblapack-dev
+          python -m pip install numpy==1.24.3  # Stable version, or replace with the latest if needed.
 
       # Build the wheels using cibuildwheel
       - name: Build wheels
