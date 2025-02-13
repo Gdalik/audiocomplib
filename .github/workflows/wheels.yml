@@ -28,7 +28,11 @@ jobs:
       - name: Clear pip cache on Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
-          Remove-Item -Recurse -Force $env:USERPROFILE\.cache\pip
+          if (Test-Path -Path $env:USERPROFILE\.cache\pip) {
+            Remove-Item -Recurse -Force $env:USERPROFILE\.cache\pip
+          } else {
+            Write-Host "No pip cache to clear"
+          }
 
       # Install build dependencies
       - name: Install dependencies
