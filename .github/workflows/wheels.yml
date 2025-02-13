@@ -8,11 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        #os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
-        os: [ubuntu-latest]
-        arch: [amd64]  # Only 64-bit architecture
-        #python-version: ['3.9', '3.10', '3.11', '3.12']
-        python-version: ['3.9']
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -25,15 +22,13 @@ jobs:
       # Install build dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade ninja
           python -m pip install --upgrade pip
           python -m pip install numpy
           python -m pip install cibuildwheel==2.22.0
           python -m pip install setuptools wheel cython
 
-      # Set CIBW_ARCHS to only build for x86_64 (64-bit)
-      - name: Set CIBW_ARCHS to x86_64
-        run: echo "CIBW_ARCHS=x86_64" >> $GITHUB_ENV
+      - name: Set CIBW_ARCHS to x86_64 and arm64
+        run: echo "CIBW_ARCHS=x86_64 arm64" >> $GITHUB_ENV
 
       # Clean up build files (Linux/macOS)
       - name: Clean up build files (Linux/macOS)
@@ -72,10 +67,6 @@ jobs:
           if (Test-Path -Path "$env:USERPROFILE\.cache\pip") { Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\pip" }
           if (Test-Path -Path "$env:USERPROFILE\.cibuildwheel") { Remove-Item -Recurse -Force "$env:USERPROFILE\.cibuildwheel" }
           git clean -fdx
-
-      # Compile Cython extensions locally (if applicable)
-      #- name: Compile Cython extensions (setup.py)
-      #  run: python setup.py build_ext --inplace
 
       # Build the wheels using cibuildwheel
       - name: Build wheels
