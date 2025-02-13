@@ -20,9 +20,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       # Clear cache to avoid previous Python versions being picked up
-      - name: Clear cache
+      - name: Clear pip cache
         run: |
-          rm -rf ~/.cache/pip  # Clear pip cache
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            # For Windows, use PowerShell command to remove pip cache
+            Remove-Item -Recurse -Force $env:USERPROFILE\.cache\pip
+          else
+            # For Linux and macOS, use rm command
+            rm -rf ~/.cache/pip
+          fi
 
       # Install build dependencies
       - name: Install dependencies
