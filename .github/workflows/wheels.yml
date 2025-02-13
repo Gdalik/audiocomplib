@@ -75,7 +75,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential gfortran libopenblas-dev liblapack-dev
-          python -m pip install numpy==1.24.3  # Stable version, or replace with the latest if needed.
+          python -m pip install numpy<2  # Stable version, or replace with the latest if needed.
 
       # Build the wheels using cibuildwheel
       - name: Build wheels
