@@ -27,9 +27,9 @@ jobs:
           python -m pip install cibuildwheel==2.22.0
           python -m pip install setuptools wheel cython
 
-      - name: Set CIBW_ARCHS for Linux (x86_64, aarch64)
+      - name: Set CIBW_ARCHS for Linux (x86_64)
         if: ${{ runner.os == 'Linux' && runner.name != 'ubuntu-24.04-arm' }}
-        run: echo "CIBW_ARCHS=x86_64 aarch64" >> $GITHUB_ENV
+        run: echo "CIBW_ARCHS=x86_64" >> $GITHUB_ENV
 
       - name: Set CIBW_ARCHS for Ubuntu 24.04 ARM
         if: ${{ runner.os == 'Linux' && runner.name == 'ubuntu-24.04-arm' }}
