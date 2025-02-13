@@ -14,7 +14,7 @@ description = "A Python library for audio dynamic compression and limiting"
 authors = [{name = "Gdaliy Garmiza", email = "gdalik@gmail.com"}]
 maintainers = [{name = "Gdaliy Garmiza", email = "gdalik@gmail.com"}]
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.9, <3.13"
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.9",
@@ -31,7 +31,7 @@ dependencies = [
 packages = ["audiocomplib"]
 
 [options]
-python_requires = ">=3.9"
+python_requires = ">=3.9, <3.13"
 zip_safe = false
 include_package_data = true
 package_data = { "*" = ["*.pyx", "*.pxd"] }
