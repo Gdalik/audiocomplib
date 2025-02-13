@@ -23,7 +23,7 @@ jobs:
       # Install build dependencies
       - name: Install dependencies
         run: |
-          export NUMPY_USE_AVX=0  # Disable AVX optimizations for NumPy
+          python -m pip install --upgrade ninja
           python -m pip install --upgrade pip
           python -m pip install numpy
           python -m pip install cibuildwheel==2.22.0
