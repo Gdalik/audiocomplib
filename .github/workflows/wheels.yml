@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
-        python-version: ['3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
 
     steps:
       - uses: actions/checkout@v4
@@ -27,21 +27,43 @@ jobs:
           python -m pip install cibuildwheel==2.22.0
           python -m pip install setuptools wheel cython
 
-      # Clean build files (Linux/macOS)
-      - name: Clean build files (Linux/macOS)
+      # Clean up build files (Linux/macOS)
+      - name: Clean up build files (Linux/macOS)
         if: ${{ runner.os != 'Windows' }}
         run: |
-          rm -rf build dist *.egg-info
+          # Remove build, dist, and egg-info files only if they exist
+          rm -rf build dist *.egg-info *.so *.o
+          git clean -fdx
 
-      # Clean build files (Windows)
-      - name: Clean build files (Windows)
+      # Clean up build files (Windows - PowerShell)
+      - name: Clean up build files (Windows)
         if: ${{ runner.os == 'Windows' }}
         run: |
           # PowerShell script to clean up build files
           if (Test-Path -Path "build") { Remove-Item -Recurse -Force "build" }
           if (Test-Path -Path "dist") { Remove-Item -Recurse -Force "dist" }
-          # Correct handling of *.egg-info directories
           Get-ChildItem -Path ".\*.egg-info" -Directory | Remove-Item -Recurse -Force
+          Get-ChildItem -Path ".\*.dll" -Recurse | Remove-Item -Force  # Clean up .dll files on Windows
+          Get-ChildItem -Path ".\*.obj" -Recurse | Remove-Item -Force  # Clean up .obj files on Windows
+          git clean -fdx
+
+      # Clean up cache (Linux/macOS)
+      - name: Clean up cache (Linux/macOS)
+        if: ${{ runner.os != 'Windows' }}
+        run: |
+          # Clean pip cache and cibuildwheel cache only if they exist
+          rm -rf ~/.cache/pip
+          rm -rf ~/.cibuildwheel
+          git clean -fdx
+
+      # Clean up cache (Windows - PowerShell)
+      - name: Clean up cache (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          # PowerShell script to clean up cache and temporary files
+          if (Test-Path -Path "$env:USERPROFILE\.cache\pip") { Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\pip" }
+          if (Test-Path -Path "$env:USERPROFILE\.cibuildwheel") { Remove-Item -Recurse -Force "$env:USERPROFILE\.cibuildwheel" }
+          git clean -fdx
 
       # Compile Cython extensions locally (if applicable)
       - name: Compile Cython extensions (setup.py)
