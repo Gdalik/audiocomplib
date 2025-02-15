@@ -1,7 +1,3 @@
-Here’s the complete and updated `README.md` for **Option 1**, where the `smooth_gain_reduction` function is treated as an internal implementation detail and not exposed to the user:
-
----
-
 # Audio Compressor and Peak Limiter
 
 This Python package provides two essential audio processing tools: **Audio Compressor** and **Peak Limiter**. These classes are designed for use in audio production applications and are implemented in Python with high performance in mind, including optional Cython-based optimizations.
