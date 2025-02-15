@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from audiocomplib.peak_limiter import PeakLimiter
+from audiocomplib import PeakLimiter
 
 
 class TestPeakLimiter(unittest.TestCase):

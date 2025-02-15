@@ -1,3 +1,7 @@
+Here’s the complete and updated `README.md` for **Option 1**, where the `smooth_gain_reduction` function is treated as an internal implementation detail and not exposed to the user:
+
+---
+
 # Audio Compressor and Peak Limiter
 
 This Python package provides two essential audio processing tools: **Audio Compressor** and **Peak Limiter**. These classes are designed for use in audio production applications and are implemented in Python with high performance in mind, including optional Cython-based optimizations.
@@ -13,11 +17,67 @@ Both the **Audio Compressor** and **Peak Limiter** take **NumPy arrays** as inpu
 
 - Python 3.9+
 - NumPy
-- Cython
+- Cython (optional, for performance optimization)
 
 ## Installation
 
-(working on this section...)
+To install the package, you can either clone the repository and install it locally or install it directly from GitHub using `pip`.
+
+### Option 1: Install from GitHub
+
+You can install the package directly from the GitHub repository using `pip`:
+
+```bash
+pip install git+https://github.com/Gdalik/audiocomplib.git
+```
+
+This will automatically handle the installation of dependencies and compile the Cython module if necessary.
+
+### Option 2: Clone and Install Locally
+
+If you prefer to clone the repository and install it locally, follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Gdalik/audiocomplib.git
+   cd audiocomplib
+   ```
+
+2. Install the package and its dependencies:
+   ```bash
+   pip install .
+   ```
+
+   This will install the package and compile the Cython module (`smooth_gain_reduction`) if it is available.
+
+### Option 3: Manual Installation (Fallback)
+
+If the Cython module is not compiled properly during installation, you can manually compile it using `setup.py`. Follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Gdalik/audiocomplib.git
+   cd audiocomplib
+   ```
+
+2. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Compile the Cython module manually:
+   ```bash
+   python setup.py build_ext --inplace
+   ```
+
+4. Install the package:
+   ```bash
+   pip install .
+   ```
+
+### Cython Optimization
+
+If you want to use the Cython-optimized version of the `smooth_gain_reduction` function, ensure that `Cython` is installed. The package will automatically compile the Cython module during installation. If the Cython module is not available, it will fall back to a pure Python implementation.
 
 ## Usage
 
@@ -34,13 +94,13 @@ input_signal = input_signal.T
 
 ```python
 import numpy as np
-from audiocomplib.audio_compressor import AudioCompressor
+from audiocomplib import AudioCompressor
 
 # Generate a sample audio signal (2 channels, 44100 samples)
 input_signal = np.random.randn(2, 44100)
 
 # Initialize compressor
-compressor = AudioCompressor(threshold=-10.0, ratio=4.0, attack_time_ms=1.0, release_time_ms=100.0)
+compressor = AudioCompressor(threshold=-10.0, ratio=4.0, attack_time_ms=1.0, release_time_ms=100.0, knee_width=3.0)
 
 # Process the signal with compression
 sample_rate = 44100
@@ -54,7 +114,7 @@ gain_reduction_dbfs = compressor.get_gain_reduction()
 
 ```python
 import numpy as np
-from audiocomplib.peak_limiter import PeakLimiter
+from audiocomplib import PeakLimiter
 
 # Generate a sample audio signal (2 channels, 44100 samples)
 input_signal = np.random.randn(2, 44100)
@@ -65,4 +125,21 @@ limiter = PeakLimiter(threshold=-1.0, attack_time_ms=0.1, release_time_ms=1.0)
 # Process the signal with peak limiting
 sample_rate = 44100
 limited_signal = limiter.process(input_signal, sample_rate)
+
+# Retrieve the gain reduction in dBFS
+gain_reduction_dbfs = limiter.get_gain_reduction()
 ```
+
+## Performance Optimization
+
+For improved performance, the `smooth_gain_reduction` function is implemented in Cython. This function is used internally by both the **Audio Compressor** and **Peak Limiter** to apply attack and release smoothing to the gain reduction.
+
+The package will automatically use the Cython-optimized version if available. If the Cython module is not compiled or unavailable, it will fall back to a pure Python implementation. This fallback is handled internally, so users do not need to make any changes to their code.
+
+## Contributing
+
+Contributions are welcome! If you find a bug or have a feature request, please open an issue on the [GitHub repository](https://github.com/yourusername/audiocomplib). If you'd like to contribute code, please fork the repository and submit a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

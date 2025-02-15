@@ -5,8 +5,8 @@ import numpy
 # Define the Cython extensions
 extensions = [
     Extension(
-        "audiocomplib.apply_gain_reduction",
-        sources=["audiocomplib/apply_gain_reduction.pyx"],
+        "audiocomplib.smooth_gain_reduction",
+        sources=["audiocomplib/smooth_gain_reduction.pyx"],
         include_dirs=[numpy.get_include()]  # Include NumPy headers
     )
 ]
