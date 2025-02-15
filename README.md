@@ -7,8 +7,6 @@ This Python package provides two essential audio processing tools: **Audio Compr
 - **Audio Compressor**: Applies dynamic range compression to audio signals, with flexible control over threshold, ratio, attack, release, and knee width.
 - **Peak Limiter**: Applies peak limiting to audio signals, aiming to prevent the signal from exceeding a specified threshold while preserving dynamics as much as possible. Adjustable attack and release times.
 
-Both the **Audio Compressor** and **Peak Limiter** take **NumPy arrays** as input with the shape `(channels, samples)`. While this may not be the most common format across all libraries, it is a reasonable choice for handling multi-channel audio, especially for compatibility with libraries such as **[Pedalboard by Spotify](https://github.com/spotify/pedalboard)**.
-
 ## Requirements
 
 - Python 3.9+
@@ -119,7 +117,7 @@ The package will automatically use the Cython-optimized version if available. If
 
 ## Contributing
 
-Contributions are welcome! If you find a bug or have a feature request, please open an issue on the [GitHub repository](https://github.com/yourusername/audiocomplib). If you'd like to contribute code, please fork the repository and submit a pull request.
+Contributions are welcome! If you find a bug or have a feature request, please open an issue on the [GitHub repository](https://github.com/Gdalik/audiocomplib). If you'd like to contribute code, please fork the repository and submit a pull request.
 
 ## License
 
