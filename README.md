@@ -15,14 +15,6 @@ This Python package provides two essential audio processing tools: **Audio Compr
 
 ## Installation
 
-You can install **audiocomplib** directly from PyPI using `pip`:
-
-```bash
-pip install audiocomplib
-```
-
-This will install the latest version of the package along with its dependencies.
-
 ### Option 1: Install from PyPI
 
 The easiest way to install **audiocomplib** is from PyPI:
