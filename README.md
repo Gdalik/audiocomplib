@@ -21,19 +21,31 @@ Both the **Audio Compressor** and **Peak Limiter** take **NumPy arrays** as inpu
 
 ## Installation
 
-To install the package, you can either clone the repository and install it locally or install it directly from GitHub using `pip`.
+You can install **audiocomplib** directly from PyPI using `pip`:
 
-### Option 1: Install from GitHub
+```bash
+pip install audiocomplib
+```
 
-You can install the package directly from the GitHub repository using `pip`:
+This will install the latest version of the package along with its dependencies.
+
+### Option 1: Install from PyPI
+
+The easiest way to install **audiocomplib** is from PyPI:
+
+```bash
+pip install audiocomplib
+```
+
+### Option 2: Install from GitHub
+
+If you want to install the latest development version directly from the GitHub repository, use:
 
 ```bash
 pip install git+https://github.com/Gdalik/audiocomplib.git
 ```
 
-This will automatically handle the installation of dependencies and compile the Cython module if necessary.
-
-### Option 2: Clone and Install Locally
+### Option 3: Clone and Install Locally
 
 If you prefer to clone the repository and install it locally, follow these steps:
 
@@ -44,33 +56,6 @@ If you prefer to clone the repository and install it locally, follow these steps
    ```
 
 2. Install the package and its dependencies:
-   ```bash
-   pip install .
-   ```
-
-   This will install the package and compile the Cython module (`smooth_gain_reduction`) if it is available.
-
-### Option 3: Manual Installation (Fallback)
-
-If the Cython module is not compiled properly during installation, you can manually compile it using `setup.py`. Follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Gdalik/audiocomplib.git
-   cd audiocomplib
-   ```
-
-2. Install the dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Compile the Cython module manually:
-   ```bash
-   python setup.py build_ext --inplace
-   ```
-
-4. Install the package:
    ```bash
    pip install .
    ```
