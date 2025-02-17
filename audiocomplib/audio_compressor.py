@@ -2,6 +2,7 @@ import numpy as np
 from .audio_dynamics import AudioDynamics
 from .smooth_gain_reduction_py import smooth_gain_reduction as smooth_gain_reduction_py
 
+
 # Try to import the Cython version
 try:
     from .smooth_gain_reduction import smooth_gain_reduction as smooth_gain_reduction_cy
@@ -91,6 +92,7 @@ class AudioCompressor(AudioDynamics):
         )
 
         target_gain_reduction = np.where(max_amplitude > 1e-10, desired_gain_reduction / max_amplitude, 1.0)
-        self._gain_reduction = smooth_gain_reduction(target_gain_reduction, self.attack_coeff, self.release_coeff)
+        self._gain_reduction = smooth_gain_reduction(target_gain_reduction, self.attack_coeff, self.release_coeff,
+                                                     last_gain_reduction=self._last_gain_reduction_loaded)
 
         return self._gain_reduction

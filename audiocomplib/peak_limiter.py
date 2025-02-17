@@ -2,6 +2,8 @@ import numpy as np
 from .audio_dynamics import AudioDynamics
 from .smooth_gain_reduction_py import smooth_gain_reduction as smooth_gain_reduction_py
 
+
+
 # Try to import the Cython version
 try:
     from .smooth_gain_reduction import smooth_gain_reduction as smooth_gain_reduction_cy
@@ -43,6 +45,8 @@ class PeakLimiter(AudioDynamics):
         max_amplitude = np.maximum(max_amplitude, 1e-10)  # Ensure max_amplitude is never zero
 
         gain_reduction = np.where(max_amplitude > self.threshold_linear, self.threshold_linear / max_amplitude, 1.0)
-        self._gain_reduction = smooth_gain_reduction(gain_reduction.astype(np.float64), self.attack_coeff, self.release_coeff)
+        self._gain_reduction = smooth_gain_reduction(gain_reduction.astype(np.float64), self.attack_coeff,
+                                                     self.release_coeff,
+                                                     last_gain_reduction=self._last_gain_reduction_loaded)
 
         return self._gain_reduction

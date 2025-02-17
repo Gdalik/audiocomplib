@@ -18,6 +18,7 @@ class AudioDynamics(ABC):
         self.attack_time_ms = attack_time_ms
         self.release_time_ms = release_time_ms
         self._gain_reduction: np.ndarray | None = None
+        self._last_gain_reduction_loaded = None
 
     def set_threshold(self, threshold: float) -> None:
         """
@@ -46,7 +47,7 @@ class AudioDynamics(ABC):
         """
         self.release_time_ms = release_time_ms
 
-    def process(self, input_signal: np.ndarray, sample_rate: int) -> np.ndarray:
+    def process(self, input_signal: np.ndarray, sample_rate: int, last_gain_reduction=None) -> np.ndarray:
         """
         Process the input signal using the dynamics processor.
 
@@ -57,22 +58,34 @@ class AudioDynamics(ABC):
         Returns:
             np.ndarray: The processed signal with the same shape as the input signal.
         """
+        if input_signal.dtype not in (np.float32, np.float64):
+            raise ValueError(f'The data type of an input signal must be float32 or float64, not {input_signal.dtype}!')
+        if last_gain_reduction is not None:
+            self.load_last_gain_reduction(last_gain_reduction)
         self._calculate_gain_reduction(input_signal, sample_rate)
-        return input_signal * self._gain_reduction
+        output_signal = input_signal * self._gain_reduction
+
+        # Ensure that the data type of the output array is the same as the data type of the input array
+        if output_signal.dtype != input_signal.dtype:
+            output_signal = output_signal.astype(dtype=input_signal.dtype)
+        return output_signal
 
     def get_gain_reduction(self) -> np.ndarray:
         """
         Get the gain reduction applied to the signal in dB.
 
         Returns:
-            np.ndarray: The gain reduction values in dB.
-
-        Raises:
-            ValueError: If the gain reduction has not been calculated yet.
+            np.ndarray or None: The gain reduction values in dB if it has already been calculated.
         """
         if self._gain_reduction is None:
-            raise ValueError("Gain reduction has not been calculated yet. Please process a signal first.")
+            return None
         return 20 * np.log10(self._gain_reduction)
+
+    def load_last_gain_reduction(self, value: np.float64) -> None:
+        """
+        In real-time processing, load the last gain reduction value from the previous chunk
+        """
+        self._last_gain_reduction_loaded = value
 
     @property
     def threshold_linear(self) -> float:
@@ -103,6 +116,16 @@ class AudioDynamics(ABC):
             float: The release coefficient.
         """
         return np.exp(-1 / max(1, int(self.release_time_ms * self._sample_rate / 1000)))
+
+    @property
+    def last_gain_reduction(self) -> float or None:
+        """
+        Return the last value from the internal gain reduction array (if any).
+
+        Returns:
+            float or None: The last linear gain reduction value.
+        """
+        return self._gain_reduction[-1] if self._gain_reduction is not None else None
 
     def _validate_input_signal(self, signal: np.ndarray, sample_rate: int) -> None:
         """
