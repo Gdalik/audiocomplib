@@ -1,3 +1,4 @@
+# Requires pedalboard library: pip install pedalboard
 from pedalboard.io import AudioStream, AudioFile
 from audiocomplib import AudioCompressor
 from pathlib import Path
@@ -17,16 +18,17 @@ def valid_audio_outputs() -> list:
 
 
 def play_audio(filename: str, output: str):
-    with AudioStream(output_device_name=output) as stream:
-        with AudioFile(filename) as f:
-            samplerate = f.samplerate
+    with AudioFile(filename) as f:
+        samplerate = f.samplerate
+        num_channels = f.num_channels
+        with AudioStream(output_device_name=output, sample_rate=samplerate, num_output_channels=num_channels) as stream:
             buffer_size = 512
             last_gr = None      # Last gain reduction value of the previous chunk (if exists)
 
             while f.tell() < f.frames:
                 chunk = f.read(buffer_size)
 
-                Comp.set_threshold(round(Comp.threshold - 0.01, 2))   # Lower threshold in real-time
+                #Comp.set_threshold(round(Comp.threshold - 0.01, 2))   # Lower threshold in real-time
                 print(f'Threshold: {Comp.threshold}')
                 if Comp.threshold <= -60:   # Stop playback when threshold reaches -60 dB
                     break
@@ -41,7 +43,7 @@ def play_audio(filename: str, output: str):
 
 
 if __name__ == '__main__':
-    Comp = AudioCompressor(threshold=0, ratio=4, attack_time_ms=30, release_time_ms=1000, knee_width=5)
+    Comp = AudioCompressor(threshold=-40, ratio=4, attack_time_ms=5, release_time_ms=200, knee_width=5)
     outputs = valid_audio_outputs()
     while True:
         filename = input('Enter absolute path to audio file:')

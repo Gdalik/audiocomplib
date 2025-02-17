@@ -28,14 +28,13 @@ def smooth_gain_reduction(np.ndarray[np.float64_t, ndim=1] gain_reduction,
     if last_gain_reduction is None:
         # If no previous state is provided, start with the first target gain reduction
         smoothed_gain_reduction[0] = gain_reduction[0]
-        first_sample_id = 1
     else:
         # If previous state is provided, start smoothing from index 0
-        smoothed_gain_reduction[0] = attack_coeff * last_gain_reduction + (1 - attack_coeff) * gain_reduction[0]
-        first_sample_id = 1
+        coeff = attack_coeff if gain_reduction[0] < last_gain_reduction else release_coeff
+        smoothed_gain_reduction[0] = coeff * last_gain_reduction + (1 - coeff) * gain_reduction[0]
 
     # Loop through the array to apply smoothing for attack and release phases
-    for i in range(first_sample_id, n):
+    for i in range(1, n):
         prev = smoothed_gain_reduction[i-1]
         target = gain_reduction[i]
         if target < prev:
