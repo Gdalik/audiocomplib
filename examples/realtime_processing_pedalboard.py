@@ -1,4 +1,25 @@
-# Requires pedalboard library. It can be installed with: pip install pedalboard
+# This module provides functionality to process and play audio files in real-time using a dynamic audio compressor.
+# The compressor parameters (threshold, ratio, attack time, release time, etc.) can be adjusted during playback.
+# The module also allows the user to select an audio output device and validates the audio file path.
+
+# Dependencies:
+# - Requires the `pedalboard` library for audio processing and streaming.
+#   It can be installed with: `pip install pedalboard`
+# - The `audiocomplib` module, which contains the `AudioCompressor` class, must be available in the Python path.
+
+# Usage:
+# 1. Run the script.
+# 2. Enter the path to an audio file when prompted.
+# 3. Select an audio output device from the list of valid devices.
+# 4. The audio will be played in real-time with dynamic compression applied.
+#    The compressor's threshold and makeup gain are automatically adjusted during playback.
+
+# Notes:
+# - The compressor's threshold is gradually lowered during playback, and makeup gain is increased.
+# - Playback stops when the compressor's threshold reaches -60 dB.
+# - The default buffer size for streaming is 512 samples.
+
+
 import sys
 from audiocomplib import AudioCompressor
 from pedalboard.io import AudioStream, AudioFile, StreamResampler
