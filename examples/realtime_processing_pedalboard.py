@@ -53,20 +53,22 @@ if __name__ == '__main__':
     # Get list of valid audio outputs
     outputs = valid_audio_outputs()
 
+    if not outputs:
+        print('No valid audio outputs!')
+        sys.exit()
+
     # Choose the audio file
     while True:
         filename = input('Enter path to audio file:')
         if Path(filename).exists() and Path(filename).is_file():
             break
-    if not outputs:
-        print('No valid audio outputs!')
-        sys.exit()
 
     # Choose the playback device
     device_num = 0
-    device_name = AudioStream.default_output_device_name
+    device_name = AudioStream.default_output_device_name if AudioStream.default_output_device_name in outputs \
+        else outputs[0]
     for ind, out in enumerate(outputs):
-        default_lab = '\t[Default]' if out == AudioStream.default_output_device_name else ''
+        default_lab = '\t[Default]' if out == device_name else ''
         print(f'{ind + 1}. {out}{default_lab}')
     while True:
         device_num = input('Enter playback device number or press Enter to use the default output:')
