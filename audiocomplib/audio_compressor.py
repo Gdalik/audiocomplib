@@ -1,24 +1,13 @@
 import numpy as np
 from .audio_dynamics import AudioDynamics
-from .smooth_gain_reduction_py import smooth_gain_reduction as smooth_gain_reduction_py
-
-
-# Try to import the Cython version
-try:
-    from .smooth_gain_reduction import smooth_gain_reduction as smooth_gain_reduction_cy
-    USE_CYTHON = True
-except ImportError:
-    USE_CYTHON = False
-
-# Use the Cython version if available, otherwise use the Python version
-smooth_gain_reduction = smooth_gain_reduction_cy if USE_CYTHON else smooth_gain_reduction_py
+from .smooth_gain_reduction_init import smooth_gain_reduction
 
 
 class AudioCompressor(AudioDynamics):
     """Audio compressor for dynamic range compression."""
 
     def __init__(self, threshold: float = -10.0, ratio: float = 4.0, attack_time_ms: float = 1.0,
-                 release_time_ms: float = 100.0, knee_width: float = 3.0, realtime=False):
+                 release_time_ms: float = 100.0, knee_width: float = 3.0, makeup_gain: float = 0.0, realtime=False):
         """
         Initialize the audio compressor.
 
@@ -28,11 +17,13 @@ class AudioCompressor(AudioDynamics):
             attack_time_ms (float): The attack time in milliseconds. Defaults to 1.0.
             release_time_ms (float): The release time in milliseconds. Defaults to 100.0.
             knee_width (float): The knee width in dB for soft knee compression. Defaults to 3.0.
+            makeup_gain (float): The make-up gain in dB. Defaults to 0.0
             realtime (bool): True if the effect is used for real-time processing (in chunks). Defaults to False.
         """
         super().__init__(threshold, attack_time_ms, release_time_ms, realtime=realtime)
         self.ratio = ratio
         self.knee_width = knee_width
+        self.makeup_gain = makeup_gain
 
     def set_ratio(self, ratio: float) -> None:
         """
@@ -51,6 +42,20 @@ class AudioCompressor(AudioDynamics):
             knee_width (float): The new knee width in dB.
         """
         self.knee_width = knee_width
+
+    def set_makeup_gain(self, makeup_gain: float) -> None:
+        """
+        Set the make-up gain after the compression
+
+        Args:
+             makeup_gain (float): The new make-up gain in dB.
+        """
+        self.makeup_gain = makeup_gain
+
+    def process(self, input_signal: np.ndarray, sample_rate: int) -> np.ndarray:
+        result = super().process(input_signal, sample_rate)
+        gain_k = 10 ** (self.makeup_gain / 20)
+        return result * gain_k
 
     def _compute_compression_factor(self, amplitude_dB: np.ndarray) -> np.ndarray:
         """

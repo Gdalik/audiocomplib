@@ -31,8 +31,8 @@ class TestAudioCompressor(unittest.TestCase):
     def test_gain_reduction(self):
         """Test if the compressor calculates gain reduction correctly."""
         self.compressor.process(self.signal, self.sample_rate)
-        gain_reduction_dbfs = self.compressor.get_gain_reduction()
-        self.assertEqual(gain_reduction_dbfs.shape[0], self.signal.shape[1])
+        gain_reduction_db = self.compressor.get_gain_reduction()
+        self.assertEqual(gain_reduction_db.shape[0], self.signal.shape[1])
 
     def test_edge_case_zero_signal(self):
         """Test edge case when the input signal is silent."""

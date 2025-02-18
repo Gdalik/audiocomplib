@@ -6,7 +6,7 @@ The library supports real-time mode, maintaining smooth transitions between audi
 
 ## Features
 
-- **Audio Compressor**: Applies dynamic range compression to audio signals, with flexible control over threshold, ratio, attack, release, and knee width.
+- **Audio Compressor**: Applies dynamic range compression to audio signals, with flexible control over threshold, ratio, attack, release, knee width and make-up gain.
 - **Peak Limiter**: Applies peak limiting to audio signals, aiming to prevent the signal from exceeding a specified threshold while preserving dynamics as much as possible. Adjustable attack and release times.
 
 ## Requirements
@@ -79,8 +79,8 @@ compressor = AudioCompressor(threshold=-10.0, ratio=4.0, attack_time_ms=1.0, rel
 sample_rate = 44100
 compressed_signal = compressor.process(input_signal, sample_rate)
 
-# Retrieve the gain reduction in dBFS
-gain_reduction_dbfs = compressor.get_gain_reduction()
+# Retrieve the gain reduction in dB
+gain_reduction_db = compressor.get_gain_reduction()
 ```
 
 ### Peak Limiter Example
@@ -99,8 +99,8 @@ limiter = PeakLimiter(threshold=-1.0, attack_time_ms=0.1, release_time_ms=1.0)
 sample_rate = 44100
 limited_signal = limiter.process(input_signal, sample_rate)
 
-# Retrieve the gain reduction in dBFS
-gain_reduction_dbfs = limiter.get_gain_reduction()
+# Retrieve the gain reduction in dB
+gain_reduction_db = limiter.get_gain_reduction()
 ```
 
 ### Public Methods
@@ -108,10 +108,11 @@ gain_reduction_dbfs = limiter.get_gain_reduction()
 Both `AudioCompressor` and `PeakLimiter` classes inherit from `AudioDynamics`, sharing common methods:
 
 #### AudioDynamics Methods:
-- `set_threshold(self, threshold)`: Sets the threshold level in dBFS.
+- `set_threshold(self, threshold)`: Sets the threshold level in dB.
 - `set_attack_time(self, attack_time_ms)`: Sets the attack time in milliseconds.
 - `set_release_time(self, release_time_ms)`: Sets the release time in milliseconds.
-- `get_gain_reduction(self)`: Returns the current gain reduction in dBFS.
+- `set_makeup_gain`: Sets the make-up gain in dB.
+- `get_gain_reduction(self)`: Returns the current gain reduction in dB.
 - `set_realtime(self, realtime: bool)`: Enables or disables real-time processing mode.
 
 #### AudioCompressor Methods:
@@ -150,7 +151,8 @@ with AudioFile('your_audio_file.wav') as f:     # Replace with path to an audio 
 
         while f.tell() < f.frames:
             chunk = f.read(buffer_size)
-            Comp.set_threshold(round(Comp.threshold - 0.01, 2))   # Lower threshold in real-time
+            Comp.set_threshold(round(Comp.threshold - 0.01, 2))   # Lower threshold
+            Comp.set_makeup_gain(round(Comp.makeup_gain + 0.002, 3))  # Add make-up gain
             chunk_comp = Comp.process(chunk, samplerate)   # Apply compression effect
 
             # Decode and play 512 samples at a time:
