@@ -5,7 +5,7 @@ import numpy as np
 class AudioDynamics(ABC):
     """Base class for audio dynamics processing (e.g., compressors, limiters)."""
 
-    def __init__(self, threshold: float, attack_time_ms: float, release_time_ms: float):
+    def __init__(self, threshold: float, attack_time_ms: float, release_time_ms: float, realtime=False):
         """
         Initialize the audio dynamics processor.
 
@@ -13,12 +13,14 @@ class AudioDynamics(ABC):
             threshold (float): The threshold level in dB. Signals above this level will be processed.
             attack_time_ms (float): The attack time in milliseconds. Determines how quickly the processor reacts to signals above the threshold.
             release_time_ms (float): The release time in milliseconds. Determines how quickly the processor stops processing after the signal falls below the threshold.
+            realtime (bool): True if the effect is used for real-time processing (in chunks). Defaults to False.
         """
         self.threshold = threshold
         self.attack_time_ms = attack_time_ms
         self.release_time_ms = release_time_ms
         self._gain_reduction: np.ndarray | None = None
         self._last_gain_reduction_loaded = None
+        self._realtime = realtime
 
     def set_threshold(self, threshold: float) -> None:
         """
@@ -47,7 +49,16 @@ class AudioDynamics(ABC):
         """
         self.release_time_ms = release_time_ms
 
-    def process(self, input_signal: np.ndarray, sample_rate: int, last_gain_reduction=None) -> np.ndarray:
+    def set_realtime(self, arg: bool):
+        """
+        Enable/disable realtime processing mode.
+
+        Args:
+            arg (bool): True (real-time mode enabled), False (real-time mode disabled)
+        """
+        self._realtime = arg
+
+    def process(self, input_signal: np.ndarray, sample_rate: int) -> np.ndarray:
         """
         Process the input signal using the dynamics processor.
 
@@ -60,8 +71,8 @@ class AudioDynamics(ABC):
         """
         if input_signal.dtype not in (np.float32, np.float64):
             raise ValueError(f'The data type of an input signal must be float32 or float64, not {input_signal.dtype}!')
-        if last_gain_reduction is not None:
-            self.load_last_gain_reduction(last_gain_reduction)
+        last_gr = self.last_gain_reduction if self._realtime else None
+        self._load_last_gain_reduction(last_gr)
         self._calculate_gain_reduction(input_signal, sample_rate)
         output_signal = input_signal * self._gain_reduction
 
@@ -81,7 +92,7 @@ class AudioDynamics(ABC):
             return None
         return 20 * np.log10(self._gain_reduction)
 
-    def load_last_gain_reduction(self, value: np.float64) -> None:
+    def _load_last_gain_reduction(self, value: np.float64) -> None:
         """
         In real-time processing, load the last gain reduction value from the previous chunk
         """

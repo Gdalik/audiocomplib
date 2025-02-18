@@ -101,6 +101,68 @@ limited_signal = limiter.process(input_signal, sample_rate)
 gain_reduction_dbfs = limiter.get_gain_reduction()
 ```
 
+### Public Methods
+
+Both `AudioCompressor` and `PeakLimiter` classes inherit from `AudioDynamics`, sharing common methods:
+
+#### AudioDynamics Methods:
+- `set_threshold(self, threshold)`: Sets the threshold level in dBFS.
+- `set_attack_time(self, attack_time_ms)`: Sets the attack time in milliseconds.
+- `set_release_time(self, release_time_ms)`: Sets the release time in milliseconds.
+- `get_gain_reduction(self)`: Returns the current gain reduction in dBFS.
+- `set_realtime(self, realtime: bool)`: Enables or disables real-time processing mode.
+
+#### AudioCompressor Methods:
+- `set_ratio(self, ratio)`: Sets the compression ratio.
+- `set_knee_width(self, knee_width)`: Sets the knee width.
+- `process(self, input_signal, sample_rate)`: Applies compression to the input signal.
+
+#### PeakLimiter Methods:
+- `process(self, input_signal, sample_rate)`: Applies peak limiting to the input signal.
+
+### Enabling real-time mode
+
+When processing audio in chunks, the `AudioCompressor` or `PeakLimiter` class object should be initialized with the `realtime` option set to True in order to activate the real-time mode. Alternatively, you can use the `set_realtime` method to enable real-time mode after initialization.
+
+In real-time mode, the effect stores its last gain reduction value and uses it when applying the attack/release smoothing of the gain reduction curve at the beginning of the next processed chunk. This ensures smooth transitions between audio chunks and maintains the integrity of the dynamic range processing without producing artifacts at chunk edges.
+
+### Real-Time Processing Example
+
+This example demonstrates real-time audio processing and playback using the `audiocomplib` and `pedalboard` libraries. It showcases how to automate the threshold parameter of an audio compressor in real-time, gradually reducing the threshold during playback.
+
+The short version (to get the idea):
+
+```python
+from pedalboard.io import AudioStream, AudioFile
+from audiocomplib import AudioCompressor
+
+# Initialize compressor
+Comp = AudioCompressor(threshold=0, ratio=4, attack_time_ms=2, release_time_ms=100, knee_width=5, realtime=True)
+
+with AudioFile('your_audio_file.wav') as f:     # Replace with path to an audio file (WAV, AIFF, FLAC, MP3 or OGG)
+    samplerate = f.samplerate
+    num_channels = f.num_channels
+    with AudioStream(output_device_name=AudioStream.default_output_device_name, sample_rate=samplerate, 
+                     num_output_channels=num_channels) as stream:
+        buffer_size = 512
+
+        while f.tell() < f.frames:
+            chunk = f.read(buffer_size)
+            Comp.set_threshold(round(Comp.threshold - 0.01, 2))   # Lower threshold in real-time
+            chunk_comp = Comp.process(chunk, samplerate)   # Apply compression effect
+
+            # Decode and play 512 samples at a time:
+            stream.write(chunk_comp, samplerate)
+```
+
+The full version of this example is available [here](examples/realtime_processing_pedalboard.py). It is more stable (handling and preventing possible exceptions) and illustrative.
+
+Before running the example, ensure you have [Pedalboard](https://github.com/spotify/pedalboard) Python library installed:
+
+```bash
+pip install pedalboard
+```
+
 ## Performance Optimization
 
 For improved performance, the `smooth_gain_reduction` function is implemented in Cython. This function is used internally by both the **Audio Compressor** and **Peak Limiter** to apply attack and release smoothing to the gain reduction.

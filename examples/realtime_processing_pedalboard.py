@@ -1,5 +1,6 @@
-# Requires pedalboard library: pip install pedalboard
-from pedalboard.io import AudioStream, AudioFile
+# Requires pedalboard library. It can be installed with: pip install pedalboard
+import sys
+from pedalboard.io import AudioStream, AudioFile, StreamResampler
 from audiocomplib import AudioCompressor
 from pathlib import Path
 
@@ -17,39 +18,62 @@ def valid_audio_outputs() -> list:
     return valid_outputs
 
 
-def play_audio(filename: str, output: str):
+def play_audio(filename: str, output_device_name=AudioStream.default_output_device_name):
+    """Playback the audio file through the output device"""
     with AudioFile(filename) as f:
         samplerate = f.samplerate
         num_channels = f.num_channels
-        with AudioStream(output_device_name=output, sample_rate=samplerate, num_output_channels=num_channels) as stream:
+        with AudioStream(output_device_name=output_device_name, sample_rate=samplerate, num_output_channels=num_channels) as stream:
             buffer_size = 512
-            last_gr = None      # Last gain reduction value of the previous chunk (if exists)
 
             while f.tell() < f.frames:
                 chunk = f.read(buffer_size)
 
-                #Comp.set_threshold(round(Comp.threshold - 0.01, 2))   # Lower threshold in real-time
-                print(f'Threshold: {Comp.threshold}')
+                Comp.set_threshold(round(Comp.threshold - 0.01, 2))   # Lower threshold in real-time
+                sys.stdout.write('\rThreshold: {}'.format(Comp.threshold))  # Show threshold value
+
                 if Comp.threshold <= -60:   # Stop playback when threshold reaches -60 dB
                     break
 
-                chunk_comp = Comp.process(chunk, samplerate, last_gain_reduction=last_gr)   # Apply compression effect
+                chunk_comp = Comp.process(chunk, samplerate)   # Apply compression effect
 
-                # Get and store the last gain reduction value of current chunk for the next iteration
-                last_gr = Comp.last_gain_reduction
+                if stream.sample_rate != samplerate:    # Resample audio if audio device samplerate is different
+                    Resample = StreamResampler(samplerate, stream.sample_rate, num_channels)
+                    chunk_comp = Resample.process(chunk_comp)
+                    samplerate = stream.sample_rate
 
                 # Decode and play 512 samples at a time:
                 stream.write(chunk_comp, samplerate)
 
 
 if __name__ == '__main__':
-    Comp = AudioCompressor(threshold=-40, ratio=4, attack_time_ms=5, release_time_ms=200, knee_width=5)
+    # Initialize compressor
+    Comp = AudioCompressor(threshold=0, ratio=4, attack_time_ms=2, release_time_ms=100, knee_width=5, realtime=True)
+
+    # Get list of valid audio outputs
     outputs = valid_audio_outputs()
+
+    # Choose the audio file
     while True:
         filename = input('Enter absolute path to audio file:')
         if Path(filename).exists() and Path(filename).is_file():
             break
     if not outputs:
         print('No valid audio outputs!')
-    else:
-        play_audio(filename, outputs[0])
+        sys.exit()
+
+    # Choose the playback device
+    device_num = 0
+    print('Playback Devices:')
+    for ind, out in enumerate(outputs):
+        print(f'{ind + 1}. {out}')
+    while True:
+        try:
+            device_num = int(input('Enter playback device number:'))
+        except ValueError:
+            continue
+        if 0 < device_num <= len(outputs):
+            break
+
+    # Process and stream audio in realtime, automating the compressor threshold parameter change
+    play_audio(filename, outputs[device_num - 1])

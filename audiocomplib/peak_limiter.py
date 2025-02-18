@@ -3,7 +3,6 @@ from .audio_dynamics import AudioDynamics
 from .smooth_gain_reduction_py import smooth_gain_reduction as smooth_gain_reduction_py
 
 
-
 # Try to import the Cython version
 try:
     from .smooth_gain_reduction import smooth_gain_reduction as smooth_gain_reduction_cy
@@ -18,7 +17,8 @@ smooth_gain_reduction = smooth_gain_reduction_cy if USE_CYTHON else smooth_gain_
 class PeakLimiter(AudioDynamics):
     """Peak limiter to cut off peaks and reduce the peak factor (crest factor) of the signal."""
 
-    def __init__(self, threshold: float = -1.0, attack_time_ms: float = 0.1, release_time_ms: float = 1.0):
+    def __init__(self, threshold: float = -1.0, attack_time_ms: float = 0.1, release_time_ms: float = 1.0,
+                 realtime=False):
         """
         Initialize the peak limiter.
 
@@ -26,8 +26,9 @@ class PeakLimiter(AudioDynamics):
             threshold (float): The threshold level in dB. Defaults to -1.0.
             attack_time_ms (float): The attack time in milliseconds. Defaults to 0.1.
             release_time_ms (float): The release time in milliseconds. Defaults to 1.0.
+            realtime (bool): True if the effect is used for real-time processing (in chunks). Defaults to False.
         """
-        super().__init__(threshold, attack_time_ms, release_time_ms)
+        super().__init__(threshold, attack_time_ms, release_time_ms, realtime=realtime)
 
     def _calculate_gain_reduction(self, signal: np.ndarray, sample_rate: int) -> np.ndarray:
         """

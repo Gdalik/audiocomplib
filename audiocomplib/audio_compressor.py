@@ -18,7 +18,7 @@ class AudioCompressor(AudioDynamics):
     """Audio compressor for dynamic range compression."""
 
     def __init__(self, threshold: float = -10.0, ratio: float = 4.0, attack_time_ms: float = 1.0,
-                 release_time_ms: float = 100.0, knee_width: float = 3.0):
+                 release_time_ms: float = 100.0, knee_width: float = 3.0, realtime=False):
         """
         Initialize the audio compressor.
 
@@ -28,8 +28,9 @@ class AudioCompressor(AudioDynamics):
             attack_time_ms (float): The attack time in milliseconds. Defaults to 1.0.
             release_time_ms (float): The release time in milliseconds. Defaults to 100.0.
             knee_width (float): The knee width in dB for soft knee compression. Defaults to 3.0.
+            realtime (bool): True if the effect is used for real-time processing (in chunks). Defaults to False.
         """
-        super().__init__(threshold, attack_time_ms, release_time_ms)
+        super().__init__(threshold, attack_time_ms, release_time_ms, realtime=realtime)
         self.ratio = ratio
         self.knee_width = knee_width
 
