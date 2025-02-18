@@ -162,20 +162,20 @@ gain_reduction_db = limiter.get_gain_reduction()
 Both `AudioCompressor` and `PeakLimiter` classes inherit from `AudioDynamics`, sharing common methods:
 
 #### AudioDynamics Methods:
-- `set_threshold(self, threshold)`: Sets the threshold level in dB.
-- `set_attack_time(self, attack_time_ms)`: Sets the attack time in milliseconds.
-- `set_release_time(self, release_time_ms)`: Sets the release time in milliseconds.
-- `get_gain_reduction(self)`: Returns the current gain reduction in dB.
-- `set_realtime(self, realtime: bool)`: Enables or disables real-time processing mode.
+- `set_threshold(threshold: float)`: Sets the threshold level in dB.
+- `set_attack_time(attack_time_ms: float)`: Sets the attack time in milliseconds.
+- `set_release_time(release_time_ms: float)`: Sets the release time in milliseconds.
+- `get_gain_reduction()`: Returns the current gain reduction in dB.
+- `set_realtime(realtime: bool)`: Enables or disables real-time processing mode.
 
 #### AudioCompressor Methods:
-- `set_ratio(self, ratio)`: Sets the compression ratio.
-- `set_knee_width(self, knee_width)`: Sets the knee width.
-- `set_makeup_gain`: Sets the make-up gain in dB.
-- `process(self, input_signal, sample_rate)`: Applies compression to the input signal.
+- `set_ratio(ratio: float)`: Sets the compression ratio.
+- `set_knee_width(knee_width: float)`: Sets the knee width.
+- `set_makeup_gain(makeup_gain: float)`: Sets the make-up gain in dB.
+- `process(input_signal: np.ndarray, sample_rate: int)`: Applies compression to the input signal.
 
 #### PeakLimiter Methods:
-- `process(self, input_signal, sample_rate)`: Applies peak limiting to the input signal.
+- `process(input_signal: np.ndarray, sample_rate: int)`: Applies peak limiting to the input signal.
 
 ### Enabling real-time mode
 
