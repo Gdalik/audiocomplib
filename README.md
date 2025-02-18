@@ -159,7 +159,7 @@ with AudioFile('your_audio_file.wav') as f:     # Replace with path to an audio 
             stream.write(chunk_comp, samplerate)
 
             if Comp.threshold <= -60:  # Stop playback when threshold reaches -60 dB
-              break
+                break
 ```
 
 The full version of this example is available [here](examples/realtime_processing_pedalboard.py). It is more stable (handling and preventing possible exceptions) and illustrative.
