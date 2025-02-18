@@ -1,8 +1,32 @@
-# Audio Compressor and Peak Limiter
+# Audiocomplib
+
+**Copyright (c) 2025, Gdaliy Garmiza**
 
 This Python package provides two essential audio processing tools: **Audio Compressor** and **Peak Limiter**. These classes are designed for use in audio applications, scripts and libraries, and are implemented in Python with high performance in mind, including optional Cython-based optimizations.
 
 The library supports real-time mode, maintaining smooth transitions between audio chunks.
+
+## Table of Contents
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+  - [Option 1: Install from PyPI](#option-1-install-from-pypi)
+  - [Option 2: Install from GitHub](#option-2-install-from-github)
+  - [Option 3: Clone and Install Locally](#option-3-clone-and-install-locally)
+- [Performance Optimization](#performance-optimization)
+  - [Manual Cython Compilation](#manual-cython-compilation)
+- [Usage](#usage)
+  - [Audio Compressor Example](#audio-compressor-example)
+  - [Peak Limiter Example](#peak-limiter-example)
+  - [Public Methods](#public-methods)
+    - [AudioDynamics Methods](#audiodynamics-methods)
+    - [AudioCompressor Methods](#audiocompressor-methods)
+    - [PeakLimiter Methods](#peaklimiter-methods)
+  - [Enabling Real-Time Mode](#enabling-real-time-mode)
+  - [Real-Time Processing Example](#real-time-processing-example)
+- [Performance Optimization](#performance-optimization)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
@@ -48,9 +72,25 @@ If you prefer to clone the repository and install it locally, follow these steps
    pip install .
    ```
 
-### Cython Optimization
+## Performance Optimization
 
-If you want to use the Cython-optimized version of the `smooth_gain_reduction` function, ensure that `Cython` is installed. The package will automatically compile the Cython module during installation. If the Cython module is not available, it will fall back to a pure Python implementation.
+For improved performance, the `smooth_gain_reduction` function is implemented in **Cython**. This function is used internally by both the **Audio Compressor** and **Peak Limiter** to apply attack and release smoothing to the gain reduction.
+
+The package will automatically use the Cython-optimized version of the `smooth_gain_reduction` function if Cython is installed and the module is successfully compiled. If the Cython module is not available (e.g., Cython is not installed or compilation fails), the package will fall back to a pure Python implementation and raise a warning message. This fallback is handled internally, so users do not need to make any changes to their code.
+
+### Manual Cython Compilation
+If you encounter issues with the automatic Cython compilation or want to ensure the Cython-optimized version is used, you can manually build the Cython extension. Follow these steps:
+
+1. Ensure `setuptools` and `Cython` are installed:
+   ```bash
+   pip install setuptools cython
+
+2. Run the following command from the root `audiocomplib` directory:
+   ```bash
+   python setup.py build_ext --inplace
+   ```
+
+This will compile the Cython module and enable the optimized version of the `smooth_gain_reduction` function.
 
 ## Usage
 
@@ -169,12 +209,6 @@ Before running the example, ensure you have [Pedalboard](https://github.com/spot
 ```bash
 pip install pedalboard
 ```
-
-## Performance Optimization
-
-For improved performance, the `smooth_gain_reduction` function is implemented in Cython. This function is used internally by both the **Audio Compressor** and **Peak Limiter** to apply attack and release smoothing to the gain reduction.
-
-The package will automatically use the Cython-optimized version if available. If the Cython module is not compiled or unavailable, it will fall back to a pure Python implementation. This fallback is handled internally, so users do not need to make any changes to their code.
 
 ## Contributing
 
