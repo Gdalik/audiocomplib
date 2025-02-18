@@ -3,7 +3,6 @@ import sys
 from audiocomplib import AudioCompressor
 from pedalboard.io import AudioStream, AudioFile, StreamResampler
 from pathlib import Path
-import math
 
 # Initialize compressor globally
 Comp = AudioCompressor(threshold=0, ratio=4, attack_time_ms=2, release_time_ms=100, knee_width=5, realtime=True)
