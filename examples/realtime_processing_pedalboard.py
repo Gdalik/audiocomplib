@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # Choose the audio file
     while True:
-        filename = input('Enter absolute path to audio file:')
+        filename = input('Enter path to audio file:')
         if Path(filename).exists() and Path(filename).is_file():
             break
     if not outputs:
@@ -64,16 +64,21 @@ if __name__ == '__main__':
 
     # Choose the playback device
     device_num = 0
-    print('Playback Devices:')
+    device_name = AudioStream.default_output_device_name
     for ind, out in enumerate(outputs):
-        print(f'{ind + 1}. {out}')
+        default_lab = '\t[Default]' if out == AudioStream.default_output_device_name else ''
+        print(f'{ind + 1}. {out}{default_lab}')
     while True:
+        device_num = input('Enter playback device number or press Enter to use the default output:')
+        if not device_num:
+            break
         try:
-            device_num = int(input('Enter playback device number:'))
+            device_num = int(device_num)
         except ValueError:
             continue
         if 0 < device_num <= len(outputs):
+            device_name = outputs[device_num - 1]
             break
 
     # Process and stream audio in realtime, automating the compressor threshold parameter change
-    play_audio(filename, outputs[device_num - 1])
+    play_audio(filename, device_name)
