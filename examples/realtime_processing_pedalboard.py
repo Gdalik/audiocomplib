@@ -73,9 +73,6 @@ def process_and_play_audio(filename: str, output_device_name: str):
                 # Show threshold and make-up gain values
                 sys.stdout.write(f'\rThreshold: {Comp.threshold} dB | Make-Up Gain: +{Comp.makeup_gain} dB')
 
-                if Comp.threshold <= -60:  # Stop playback when threshold reaches -60 dB
-                    break
-
                 chunk_comp = Comp.process(chunk, samplerate)  # Apply compression effect
 
                 if stream.sample_rate != samplerate:  # Resample audio if audio device samplerate is different
@@ -85,6 +82,9 @@ def process_and_play_audio(filename: str, output_device_name: str):
 
                 # Decode and play 512 samples at a time:
                 stream.write(chunk_comp, samplerate)
+
+                if Comp.threshold <= -60:  # Stop playback when threshold reaches -60 dB
+                    break
 
 
 def main():

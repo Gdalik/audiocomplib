@@ -131,7 +131,7 @@ In real-time mode, the effect stores its last gain reduction value and uses it w
 
 ### Real-Time Processing Example
 
-This example demonstrates real-time audio processing and playback using the `audiocomplib` and `pedalboard` libraries. It showcases how to automate the threshold parameter of an audio compressor in real-time, gradually reducing the threshold during playback.
+This example demonstrates real-time audio processing and playback using the `audiocomplib` and `pedalboard` libraries. It showcases how to automate the threshold and the make-up gain parameters of an audio compressor in real-time, gradually reducing the threshold during playback.
 
 The short version (to get the idea):
 
@@ -157,6 +157,9 @@ with AudioFile('your_audio_file.wav') as f:     # Replace with path to an audio 
 
             # Decode and play 512 samples at a time:
             stream.write(chunk_comp, samplerate)
+
+            if Comp.threshold <= -60:  # Stop playback when threshold reaches -60 dB
+              break
 ```
 
 The full version of this example is available [here](examples/realtime_processing_pedalboard.py). It is more stable (handling and preventing possible exceptions) and illustrative.
