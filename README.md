@@ -8,6 +8,7 @@ The library supports real-time mode, maintaining smooth transitions between audi
 
 ## Table of Contents
 - [Features](#features)
+- [Quick Start](#quick-start)
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [Option 1: Install from PyPI](#option-1-install-from-pypi)
@@ -32,6 +33,12 @@ The library supports real-time mode, maintaining smooth transitions between audi
 
 - **Audio Compressor**: Applies dynamic range compression to audio signals, with flexible control over threshold, ratio, attack, release, knee width and make-up gain.
 - **Peak Limiter**: Applies peak limiting to audio signals, aiming to prevent the signal from exceeding a specified threshold while preserving dynamics as much as possible. Adjustable attack and release times.
+
+## Quick Start
+
+To quickly test the library, simply [install it](#installation) and proceed with running the [examples](#audio-compressor-example).
+
+If you're eager to try the real-time processing feature, check out [this script](examples/realtime_processing_pedalboard.py) and experiment with your own compression parameters.
 
 ## Requirements
 
@@ -78,19 +85,26 @@ For improved performance, the `smooth_gain_reduction` function is implemented in
 
 The package will automatically use the Cython-optimized version of the `smooth_gain_reduction` function if Cython is installed and the module is successfully compiled. If the Cython module is not available (e.g., Cython is not installed or compilation fails), the package will fall back to a pure Python implementation and raise a warning message. This fallback is handled internally, so users do not need to make any changes to their code.
 
-### Manual Cython Compilation
-If you encounter issues with the automatic Cython compilation or want to ensure the Cython-optimized version is used, you can manually build the Cython extension. Follow these steps:
+## Building from Source with Manual Cython Compilation
+If you encounter issues with the automatic Cython compilation or want to ensure the Cython-optimized version is used, you can clone the repository (see [Installation.Option 3, step 1](#option-3-clone-and-install-locally)), manually build the Cython extension and then build `audiocomplib` from the source. After cloning the repository, follow these steps:
 
-1. Ensure `setuptools` and `Cython` are installed:
+1. Navigate to the root `audiocomplib` directory (if you are not already there).
+
+2. Ensure all the dependencies are installed by running:
    ```bash
-   pip install setuptools cython
+   pip install -r requirements.txt
 
-2. Run the following command from the root `audiocomplib` directory:
+3. Manually compile the Cython extension:
    ```bash
    python setup.py build_ext --inplace
    ```
 
-This will compile the Cython module and enable the optimized version of the `smooth_gain_reduction` function.
+This will build the Cython module and enable the optimized version of the `smooth_gain_reduction` function.
+
+4. Finally, build the package:
+   ```bash
+   pip install .
+   ```
 
 ## Usage
 
