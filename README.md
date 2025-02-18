@@ -165,13 +165,13 @@ Both `AudioCompressor` and `PeakLimiter` classes inherit from `AudioDynamics`, s
 - `set_threshold(self, threshold)`: Sets the threshold level in dB.
 - `set_attack_time(self, attack_time_ms)`: Sets the attack time in milliseconds.
 - `set_release_time(self, release_time_ms)`: Sets the release time in milliseconds.
-- `set_makeup_gain`: Sets the make-up gain in dB.
 - `get_gain_reduction(self)`: Returns the current gain reduction in dB.
 - `set_realtime(self, realtime: bool)`: Enables or disables real-time processing mode.
 
 #### AudioCompressor Methods:
 - `set_ratio(self, ratio)`: Sets the compression ratio.
 - `set_knee_width(self, knee_width)`: Sets the knee width.
+- `set_makeup_gain`: Sets the make-up gain in dB.
 - `process(self, input_signal, sample_rate)`: Applies compression to the input signal.
 
 #### PeakLimiter Methods:
