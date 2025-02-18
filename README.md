@@ -131,7 +131,7 @@ In real-time mode, the effect stores its last gain reduction value and uses it w
 
 ### Real-Time Processing Example
 
-This example demonstrates real-time audio processing and playback using the `audiocomplib` and `pedalboard` libraries. It showcases how to automate the threshold and the make-up gain parameters of an audio compressor in real-time, gradually reducing the threshold during playback.
+This example demonstrates real-time audio processing and playback using the `audiocomplib` and `pedalboard` libraries. It showcases how to automate the threshold and the make-up gain parameters of an audio compressor in real-time, gradually reducing the threshold during playback and increasing output gain to compensate the attenuation.
 
 The short version (to get the idea):
 

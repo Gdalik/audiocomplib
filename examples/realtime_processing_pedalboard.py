@@ -68,7 +68,7 @@ def process_and_play_audio(filename: str, output_device_name: str):
                 chunk = f.read(buffer_size)
 
                 Comp.set_threshold(round(Comp.threshold - 0.01, 2))  # Lower threshold
-                Comp.set_makeup_gain(round(Comp.makeup_gain + 0.002, 3))  # Add make-up gain
+                Comp.set_makeup_gain(round(Comp.makeup_gain + 0.0025, 4))  # Add make-up gain
 
                 # Show threshold and make-up gain values
                 sys.stdout.write(f'\rThreshold: {Comp.threshold} dB | Make-Up Gain: +{Comp.makeup_gain} dB')
