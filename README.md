@@ -2,6 +2,8 @@
 
 This Python package provides two essential audio processing tools: **Audio Compressor** and **Peak Limiter**. These classes are designed for use in audio applications, scripts and libraries, and are implemented in Python with high performance in mind, including optional Cython-based optimizations.
 
+The library supports real-time mode, maintaining smooth transitions between audio chunks.
+
 ## Features
 
 - **Audio Compressor**: Applies dynamic range compression to audio signals, with flexible control over threshold, ratio, attack, release, and knee width.
