@@ -8,14 +8,14 @@ The library supports real-time mode, maintaining smooth transitions between audi
 
 ## Table of Contents
 - [Features](#features)
-- [Quick Start](#quick-start)
 - [Requirements](#requirements)
+- [Quick Start](#quick-start)
 - [Installation](#installation)
   - [Option 1: Install from PyPI](#option-1-install-from-pypi)
   - [Option 2: Install from GitHub](#option-2-install-from-github)
   - [Option 3: Clone and Install Locally](#option-3-clone-and-install-locally)
 - [Performance Optimization](#performance-optimization)
-  - [Manual Cython Compilation](#manual-cython-compilation)
+- [Building from Source with Manual Cython Compilation](#building-from-source-with-manual-cython-compilation)
 - [Usage](#usage)
   - [Audio Compressor Example](#audio-compressor-example)
   - [Peak Limiter Example](#peak-limiter-example)
@@ -34,17 +34,17 @@ The library supports real-time mode, maintaining smooth transitions between audi
 - **Audio Compressor**: Applies dynamic range compression to audio signals, with flexible control over threshold, ratio, attack, release, knee width and make-up gain.
 - **Peak Limiter**: Applies peak limiting to audio signals, aiming to prevent the signal from exceeding a specified threshold while preserving dynamics as much as possible. Adjustable attack and release times.
 
-## Quick Start
-
-To quickly test the library, simply [install it](#installation) and proceed with running the [examples](#audio-compressor-example).
-
-If you're eager to try the real-time processing feature, check out [this script](examples/realtime_processing_pedalboard.py) and experiment with your own compression parameters.
-
 ## Requirements
 
 - Python 3.9+
 - NumPy
 - Cython (optional, for performance optimization)
+
+## Quick Start
+
+To quickly test the library, simply [install it](#installation) and proceed with running the [examples](#audio-compressor-example).
+
+If you're eager to try the real-time processing feature, check out [this script](examples/realtime_processing_pedalboard.py) and experiment with your own compression parameters.
 
 ## Installation
 
@@ -86,7 +86,7 @@ For improved performance, the `smooth_gain_reduction` function is implemented in
 The package will automatically use the Cython-optimized version of the `smooth_gain_reduction` function if Cython is installed and the module is successfully compiled. If the Cython module is not available (e.g., Cython is not installed or compilation fails), the package will fall back to a pure Python implementation and raise a warning message. This fallback is handled internally, so users do not need to make any changes to their code.
 
 ## Building from Source with Manual Cython Compilation
-If you encounter issues with the automatic Cython compilation or want to ensure the Cython-optimized version is used, you can clone the repository (see [Installation.Option 3, step 1](#option-3-clone-and-install-locally)), manually build the Cython extension and then build `audiocomplib` from the source. After cloning the repository, follow these steps:
+If you encounter issues with the automatic Cython compilation or want to ensure the Cython-optimized version is used, you can clone the repository (see [Installation.Option 3, step 1](#option-3-clone-and-install-locally)), manually compile the Cython extension and then build `audiocomplib` from the source. After cloning the repository, follow these steps:
 
 1. Navigate to the root `audiocomplib` directory (if you are not already there).
 
