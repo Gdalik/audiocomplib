@@ -137,7 +137,7 @@ def main():
     # Choose the playback device
     device_name = select_playback_device(outputs)
 
-    # Process and stream audio in realtime, automating the compressor threshold parameter change
+    # Process and stream audio in realtime, automating the compressor parameters change
     process_and_play_audio(filename, device_name)
 
 
