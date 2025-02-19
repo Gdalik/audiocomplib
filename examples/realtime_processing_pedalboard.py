@@ -6,6 +6,7 @@
 # - Requires the `pedalboard` library for audio processing and streaming.
 #   It can be installed with: `pip install pedalboard`
 # - The `audiocomplib` module, which contains the `AudioCompressor` class, must be available in the Python path.
+# - `NumPy` should be installed together with either `pedalboard` or `audiocomplib`.
 
 # Usage:
 # 1. Run the script.
@@ -22,6 +23,7 @@
 
 
 import sys
+import numpy as np
 from audiocomplib import AudioCompressor
 from pedalboard.io import AudioStream, AudioFile, StreamResampler
 from pathlib import Path
@@ -79,15 +81,14 @@ def select_playback_device(valid_outputs: list) -> str:
 def process_and_play_audio(filename: str, output_device_name: str):
     """Process and play the audio file through the selected output device."""
     with AudioFile(filename) as f:
-        samplerate = f.samplerate
-        num_channels = f.num_channels
+        stream_num_channels = 2 if f.num_channels == 1 else f.num_channels
 
-        with AudioStream(output_device_name=output_device_name, sample_rate=samplerate,
-                         num_output_channels=num_channels) as stream:
+        with AudioStream(output_device_name=output_device_name, sample_rate=f.samplerate,
+                         num_output_channels=stream_num_channels) as stream:
             print('Streaming audio from audiofile, applying AudioCompressor in real time...')
             buffer_size = 512
-            device_samplerate = stream.sample_rate
-            Resample = StreamResampler(samplerate, device_samplerate, num_channels) if samplerate != device_samplerate else None
+
+            Resample = StreamResampler(f.samplerate, stream.sample_rate, f.num_channels) if f.samplerate != stream.sample_rate else None
 
             while f.tell() < f.frames:
                 chunk = f.read(buffer_size)
@@ -108,13 +109,16 @@ def process_and_play_audio(filename: str, output_device_name: str):
                                  f' | Knee Width: {Comp.knee_width} dB'
                                  f' | Make-Up Gain: +{Comp.makeup_gain} dB')
 
-                chunk_comp = Comp.process(chunk, samplerate)  # Apply compression effect
+                chunk_comp = Comp.process(chunk, f.samplerate)  # Apply compression effect
 
-                if samplerate != device_samplerate:  # Resample audio if audio device samplerate is different
+                if f.samplerate != stream.sample_rate:  # Resample audio if audio device samplerate is different
                     chunk_comp = Resample.process(chunk_comp)
 
+                #   Mono signal to stereo stream
+                chunk_out = np.concatenate((chunk_comp, chunk_comp), axis=0) if chunk.shape[0] == 1 else chunk_comp
+
                 # Decode and play 512 samples at a time:
-                stream.write(chunk_comp, device_samplerate)
+                stream.write(chunk_out, stream.sample_rate)
 
                 if Comp.threshold <= -60:  # Stop playback when threshold reaches -60 dB
                     break
