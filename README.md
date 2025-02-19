@@ -165,7 +165,7 @@ Both `AudioCompressor` and `PeakLimiter` classes inherit from `AudioDynamics`, s
 - `set_threshold(threshold: float)`: Sets the threshold level in dB.
 - `set_attack_time(attack_time_ms: float)`: Sets the attack time in milliseconds.
 - `set_release_time(release_time_ms: float)`: Sets the release time in milliseconds.
-- `get_gain_reduction()`: Returns the current gain reduction in dB.
+- `get_gain_reduction()`: Returns the gain reduction curve as a numpy array of values in dB.
 - `set_realtime(realtime: bool)`: Enables or disables real-time processing mode.
 
 #### AudioCompressor Methods:
