@@ -25,7 +25,6 @@ The library supports real-time mode, maintaining smooth transitions between audi
     - [PeakLimiter Methods](#peaklimiter-methods)
   - [Enabling Real-Time Mode](#enabling-real-time-mode)
   - [Real-Time Processing Example](#real-time-processing-example)
-- [Performance Optimization](#performance-optimization)
 - [Contributing](#contributing)
 - [License](#license)
 
