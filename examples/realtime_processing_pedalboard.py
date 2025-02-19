@@ -81,10 +81,13 @@ def process_and_play_audio(filename: str, output_device_name: str):
     with AudioFile(filename) as f:
         samplerate = f.samplerate
         num_channels = f.num_channels
+
         with AudioStream(output_device_name=output_device_name, sample_rate=samplerate,
                          num_output_channels=num_channels) as stream:
             print('Streaming audio from audiofile, applying AudioCompressor in real time...')
             buffer_size = 512
+            device_samplerate = stream.sample_rate
+            Resample = StreamResampler(samplerate, device_samplerate, num_channels) if samplerate != device_samplerate else None
 
             while f.tell() < f.frames:
                 chunk = f.read(buffer_size)
@@ -107,13 +110,11 @@ def process_and_play_audio(filename: str, output_device_name: str):
 
                 chunk_comp = Comp.process(chunk, samplerate)  # Apply compression effect
 
-                if stream.sample_rate != samplerate:  # Resample audio if audio device samplerate is different
-                    Resample = StreamResampler(samplerate, stream.sample_rate, num_channels)
+                if samplerate != device_samplerate:  # Resample audio if audio device samplerate is different
                     chunk_comp = Resample.process(chunk_comp)
-                    samplerate = stream.sample_rate
 
                 # Decode and play 512 samples at a time:
-                stream.write(chunk_comp, samplerate)
+                stream.write(chunk_comp, device_samplerate)
 
                 if Comp.threshold <= -60:  # Stop playback when threshold reaches -60 dB
                     break
