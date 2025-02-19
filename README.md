@@ -216,7 +216,7 @@ with AudioFile('your_audio_file.wav') as f:     # Replace with path to an audio 
                 break
 ```
 
-The full version of this example is available [here](examples/realtime_processing_pedalboard.py). It is more stable (handling and preventing possible exceptions) and illustrative.
+The extended version of this example is available [here](examples/realtime_processing_pedalboard.py). It is more stable (handling and preventing possible exceptions) and illustrative.
 
 Before running the example, ensure you have [Pedalboard](https://github.com/spotify/pedalboard) Python library installed:
 
