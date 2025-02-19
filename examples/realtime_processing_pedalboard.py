@@ -6,7 +6,7 @@
 # - Requires the `pedalboard` library for audio processing and streaming.
 #   It can be installed with: `pip install pedalboard`
 # - The `audiocomplib` module, which contains the `AudioCompressor` class, must be available in the Python path.
-# - `NumPy` should be installed together with either `pedalboard` or `audiocomplib`.
+# - The `numpy` library should be installed together with either `pedalboard` or `audiocomplib`.
 
 # Usage:
 # 1. Run the script.
