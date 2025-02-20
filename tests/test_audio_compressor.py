@@ -8,8 +8,6 @@ class TestAudioCompressor(unittest.TestCase):
     def setUp(self):
         """Set up the compressor instance and signal before each test."""
         self.compressor = AudioCompressor(threshold=-10.0, ratio=4.0, attack_time_ms=1.0, release_time_ms=100.0)
-        # Simulate a test signal with 1 channel and 10 samples
-        # self.signal = np.array([[0.5, 0.8, 1.2, 1.0, 0.3, 0.4, 1.5, 2.0, 0.7, 1.1]])
         self.signal = np.clip(np.random.randn(2, 44100), -1, 1)
         self.sample_rate = 44100
 
