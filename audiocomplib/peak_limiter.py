@@ -19,22 +19,32 @@ class PeakLimiter(AudioDynamics):
         """
         super().__init__(threshold, attack_time_ms, release_time_ms, realtime=realtime)
 
-    def _calculate_gain_reduction(self, signal: np.ndarray, sample_rate: int) -> np.ndarray:
+    def target_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
+        """
+        Calculate the target gain reduction before attack/release smoothing for limiter.
+
+        Args:
+            signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
+
+        Returns:
+            np.ndarray: The linear gain reduction values between 0 and 1.
+        """
+        max_amplitude = self._compute_max_amplitude(signal)
+        max_amplitude = np.maximum(max_amplitude, 1e-10)  # Ensure max_amplitude is never zero
+
+        return np.where(max_amplitude > self.threshold_linear, self.threshold_linear / max_amplitude, 1.0)
+
+    def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
         """
         Calculate the gain reduction for the peak limiter.
 
         Args:
             signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
-            sample_rate (int): The sample rate of the input signal in Hz.
 
         Returns:
             np.ndarray: The gain reduction values to be applied to the signal.
         """
-        self._validate_input_signal(signal, sample_rate)
-        max_amplitude = self._compute_max_amplitude(signal)
-        max_amplitude = np.maximum(max_amplitude, 1e-10)  # Ensure max_amplitude is never zero
-
-        gain_reduction = np.where(max_amplitude > self.threshold_linear, self.threshold_linear / max_amplitude, 1.0)
+        gain_reduction = self.target_gain_reduction(signal)
         self._gain_reduction = smooth_gain_reduction(gain_reduction.astype(np.float64), self.attack_coeff,
                                                      self.release_coeff,
                                                      last_gain_reduction=self._last_gain_reduction_loaded)

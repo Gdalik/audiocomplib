@@ -69,11 +69,10 @@ class AudioDynamics(ABC):
         Returns:
             np.ndarray: The processed signal with the same shape as the input signal.
         """
-        if input_signal.dtype not in (np.float32, np.float64):
-            raise ValueError(f'The data type of an input signal must be float32 or float64, not {input_signal.dtype}!')
+        self._validate_input_signal(input_signal, sample_rate)
         last_gr = self.last_gain_reduction if self._realtime else None
         self._load_last_gain_reduction(last_gr)
-        self._calculate_gain_reduction(input_signal, sample_rate)
+        self._calculate_gain_reduction(input_signal)
         output_signal = input_signal * self._gain_reduction
 
         # Ensure that the data type of the output array is the same as the data type of the input array
@@ -81,7 +80,7 @@ class AudioDynamics(ABC):
             output_signal = output_signal.astype(dtype=input_signal.dtype)
         return output_signal
 
-    def get_gain_reduction(self) -> np.ndarray:
+    def get_gain_reduction(self) -> np.ndarray or None:
         """
         Get the gain reduction applied to the signal in dB.
 
@@ -149,11 +148,12 @@ class AudioDynamics(ABC):
         Raises:
             ValueError: If the input signal is not a 2D array or the sample rate is invalid.
         """
-        if signal.ndim != 2:
-            raise ValueError("Input signal must be a 2D array with shape (channels, samples).")
         if sample_rate <= 0:
             raise ValueError("Sample rate must be a positive value.")
-        self._sample_rate = sample_rate
+        else:
+            self._sample_rate = sample_rate
+        if signal.dtype not in (np.float32, np.float64):
+            raise ValueError(f'The data type of an input signal must be float32 or float64, not {signal.dtype}!')
 
     def _compute_max_amplitude(self, signal: np.ndarray) -> np.ndarray:
         """
@@ -165,16 +165,30 @@ class AudioDynamics(ABC):
         Returns:
             np.ndarray: The maximum amplitude for each sample across channels.
         """
+        if signal.ndim != 2:
+            raise ValueError("Input signal must be a 2D array with shape (channels, samples).")
         return np.max(np.abs(signal), axis=0)
 
     @abstractmethod
-    def _calculate_gain_reduction(self, signal: np.ndarray, sample_rate: int) -> np.ndarray:
+    def target_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
+        """
+        Calculate the target gain reduction before attack/release smoothing.
+
+        Args:
+            signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
+
+        Returns:
+            np.ndarray: The linear gain reduction values between 0 and 1.
+        """
+        pass
+
+    @abstractmethod
+    def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
         """
         Calculate the gain reduction to be applied to the signal.
 
         Args:
             signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
-            sample_rate (int): The sample rate of the input signal in Hz.
 
         Returns:
             np.ndarray: The gain reduction values to be applied to the signal.

@@ -81,18 +81,16 @@ class AudioCompressor(AudioDynamics):
                 np.where(amplitude_dB >= self.threshold, self.ratio, 1)
             )
 
-    def _calculate_gain_reduction(self, signal: np.ndarray, sample_rate: int) -> np.ndarray:
+    def target_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
         """
-        Calculate the gain reduction for the compressor.
+        Calculate the target gain reduction before attack/release smoothing for compressor.
 
         Args:
             signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
-            sample_rate (int): The sample rate of the input signal in Hz.
 
         Returns:
-            np.ndarray: The gain reduction values to be applied to the signal.
+            np.ndarray: The linear gain reduction values between 0 and 1.
         """
-        self._validate_input_signal(signal, sample_rate)
         max_amplitude = self._compute_max_amplitude(signal)
         max_amplitude = np.maximum(max_amplitude, 1e-10)  # Ensure max_amplitude is never zero
         amplitude_dB = 20 * np.log10(max_amplitude)  # Avoid log(0) since max_amplitude is >= 1e-10
@@ -104,7 +102,20 @@ class AudioCompressor(AudioDynamics):
             max_amplitude
         )
 
-        target_gain_reduction = np.where(max_amplitude > 1e-10, desired_gain_reduction / max_amplitude, 1.0)
+        return np.where(max_amplitude > 1e-10, desired_gain_reduction / max_amplitude, 1.0)
+
+    def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
+        """
+        Calculate the gain reduction for the compressor.
+
+        Args:
+            signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
+
+        Returns:
+            np.ndarray: The gain reduction values to be applied to the signal.
+        """
+
+        target_gain_reduction = self.target_gain_reduction(signal)
         self._gain_reduction = smooth_gain_reduction(target_gain_reduction, self.attack_coeff, self.release_coeff,
                                                      last_gain_reduction=self._last_gain_reduction_loaded)
 
