@@ -59,28 +59,6 @@ class AudioCompressor(AudioDynamics):
         gain_k = 10 ** (self.makeup_gain / 20)
         return result * gain_k
 
-    def _compute_compression_factor(self, amplitude_dB: np.ndarray) -> np.ndarray:
-        """
-        Compute the compression factor based on the input amplitude in dB.
-
-        Args:
-            amplitude_dB (np.ndarray): The input amplitude in dB.
-
-        Returns:
-            np.ndarray: The compression factor for each sample.
-        """
-        if self.knee_width == 0:
-            # Hard knee: no smooth transition, just apply ratio above threshold
-            return np.where(amplitude_dB >= self.threshold, self.ratio, 1)
-        else:
-            # Soft knee: apply smooth transition around the threshold
-            knee_start = self.threshold - self.knee_width / 2
-            return np.where(
-                (amplitude_dB > knee_start) & (amplitude_dB < self.threshold),
-                1 + (self.ratio - 1) * ((amplitude_dB - knee_start) / self.knee_width),
-                np.where(amplitude_dB >= self.threshold, self.ratio, 1)
-            )
-
     def target_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
         """
         Calculate the target gain reduction before attack/release smoothing for compressor.
@@ -91,18 +69,56 @@ class AudioCompressor(AudioDynamics):
         Returns:
             np.ndarray: The linear gain reduction values between 0 and 1.
         """
+        # Compute the maximum amplitude of the signal
         max_amplitude = self._compute_max_amplitude(signal)
         max_amplitude = np.maximum(max_amplitude, 1e-10)  # Ensure max_amplitude is never zero
+
+        # Convert amplitude to dB
         amplitude_dB = 20 * np.log10(max_amplitude)  # Avoid log(0) since max_amplitude is >= 1e-10
 
-        compression_factor = self._compute_compression_factor(amplitude_dB)
-        desired_gain_reduction = np.where(
-            amplitude_dB > self.threshold,
-            self.threshold_linear * (max_amplitude / self.threshold_linear) ** (1 / compression_factor),
-            max_amplitude
-        )
+        # Conditions for soft knee region
+        knee_start = self.threshold - self.knee_width / 2
+        knee_end = self.threshold + self.knee_width / 2
+        in_soft_knee = (amplitude_dB > knee_start) & (amplitude_dB < knee_end)
 
-        return np.where(max_amplitude > 1e-10, desired_gain_reduction / max_amplitude, 1.0)
+        # Compute desired gain reduction
+        if self.knee_width == 0:
+            # Hard knee: no smooth transition, just apply ratio above threshold
+            desired_gain_reduction = np.where(
+                amplitude_dB > self.threshold,
+                (max_amplitude / self.threshold_linear) ** (1 / self.ratio - 1),
+                1.0
+            )
+        else:
+            # Soft knee: apply second-order interpolation within the knee region
+            # Quadratic interpolation: y = a * x^2 + b * x + c
+            # Boundary conditions:
+            # 1. At x = knee_start, y = 1 (no compression)
+            # 2. At x = knee_end, y = (10^(knee_end/20) / threshold_linear)^(1/ratio - 1) (hard knee gain reduction)
+            # 3. Derivative at x = knee_start is 0 (smooth transition)
+            x1 = knee_start
+            x2 = knee_end
+            y1 = 1.0
+            y2 = (10 ** (knee_end / 20) / self.threshold_linear) ** (1 / self.ratio - 1)
+
+            # Solve for coefficients a, b, c
+            a = (y2 - y1) / (x2 - x1) ** 2
+            b = -2 * a * x1
+            c = y1 - a * x1 ** 2 - b * x1
+
+            # Compute gain reduction within the knee region
+            gain_reduction_knee = a * amplitude_dB ** 2 + b * amplitude_dB + c
+
+            # Apply gain reduction
+            desired_gain_reduction = np.where(
+                in_soft_knee,
+                gain_reduction_knee,
+                np.where(amplitude_dB >= knee_end, (max_amplitude / self.threshold_linear) ** (1 / self.ratio - 1), 1.0)
+            )
+
+            # Ensure gain reduction is within [0, 1]
+        gain_reduction = np.clip(desired_gain_reduction, 0.0, 1.0)
+        return gain_reduction
 
     def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
         """
@@ -115,7 +131,7 @@ class AudioCompressor(AudioDynamics):
             np.ndarray: The gain reduction values to be applied to the signal.
         """
 
-        target_gain_reduction = self.target_gain_reduction(signal)
+        target_gain_reduction = self.target_gain_reduction(signal).astype(dtype=np.float64)
         self._gain_reduction = smooth_gain_reduction(target_gain_reduction, self.attack_coeff, self.release_coeff,
                                                      last_gain_reduction=self._last_gain_reduction_loaded)
 
