@@ -90,34 +90,26 @@ class AudioCompressor(AudioDynamics):
                 1.0
             )
         else:
-            # Soft knee: apply second-order interpolation within the knee region
-            # Quadratic interpolation: y = a * x^2 + b * x + c
-            # Boundary conditions:
-            # 1. At x = knee_start, y = 1 (no compression)
-            # 2. At x = knee_end, y = (10^(knee_end/20) / threshold_linear)^(1/ratio - 1) (hard knee gain reduction)
-            # 3. Derivative at x = knee_start is 0 (smooth transition)
-            x1 = knee_start
-            x2 = knee_end
-            y1 = 1.0
-            y2 = (10 ** (knee_end / 20) / self.threshold_linear) ** (1 / self.ratio - 1)
+            # Soft knee: apply the soft knee equation within the knee region
+            # y = x + ((1 / R - 1) * (x - T + W/2)^2) / (2 * W)
+            x = amplitude_dB
+            T = self.threshold
+            W = self.knee_width
+            R = self.ratio
 
-            # Solve for coefficients a, b, c
-            ar_a = np.array([
-                [x1 ** 2, x1, 1],
-                [x2 ** 2, x2, 1],
-                [2 * x1, 1, 0]
-            ])
-            ar_b = np.array([y1, y2, 0])
-            a, b, c = np.linalg.solve(ar_a, ar_b)
+            # Compute output level in dB for the soft knee region
+            output_dB_soft_knee = x + ((1 / R - 1) * (x - T + W / 2) ** 2) / (2 * W)
 
+            # Convert output level back to linear scale
+            output_linear_soft_knee = 10 ** (output_dB_soft_knee / 20)
 
-            # Compute gain reduction within the knee region
-            gain_reduction_knee = a * amplitude_dB ** 2 + b * amplitude_dB + c
+            # Compute gain reduction in the soft knee region
+            gain_reduction_soft_knee = output_linear_soft_knee / max_amplitude
 
             # Apply gain reduction
             desired_gain_reduction = np.where(
                 in_soft_knee,
-                gain_reduction_knee,
+                gain_reduction_soft_knee,
                 np.where(amplitude_dB >= knee_end, (max_amplitude / self.threshold_linear) ** (1 / self.ratio - 1), 1.0)
             )
 
