@@ -43,7 +43,7 @@ The library supports real-time mode, maintaining smooth transitions between audi
 
 To quickly test the library, simply [install it](#installation) and proceed with running the [examples](#audio-compressor-example).
 
-If you're eager to try the real-time processing feature, check out [this script](examples/realtime_processing_pedalboard.py) and experiment with your own compression parameters.
+If you're eager to try the real-time processing feature, check out [this script](https://github.com/Gdalik/audiocomplib/blob/main/examples/realtime_processing_pedalboard.py) and experiment with your own compression parameters.
 
 ## Installation
 
@@ -215,7 +215,7 @@ with AudioFile('your_audio_file.wav') as f:     # Replace with path to an audio 
                 break
 ```
 
-The extended version of this example is available [here](examples/realtime_processing_pedalboard.py). It is more stable (handling and preventing possible exceptions) and illustrative.
+The extended version of this example is available [here](https://github.com/Gdalik/audiocomplib/blob/main/examples/realtime_processing_pedalboard.py). It is more stable (handling and preventing possible exceptions) and illustrative.
 
 Before running the example, ensure you have [Pedalboard](https://github.com/spotify/pedalboard) Python library installed:
 
@@ -229,4 +229,4 @@ Contributions are welcome! If you find a bug or have a feature request, please o
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/Gdalik/audiocomplib/blob/main/LICENSE) file for details.
