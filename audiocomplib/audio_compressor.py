@@ -102,9 +102,14 @@ class AudioCompressor(AudioDynamics):
             y2 = (10 ** (knee_end / 20) / self.threshold_linear) ** (1 / self.ratio - 1)
 
             # Solve for coefficients a, b, c
-            a = (y2 - y1) / (x2 - x1) ** 2
-            b = -2 * a * x1
-            c = y1 - a * x1 ** 2 - b * x1
+            ar_a = np.array([
+                [x1 ** 2, x1, 1],
+                [x2 ** 2, x2, 1],
+                [2 * x1, 1, 0]
+            ])
+            ar_b = np.array([y1, y2, 0])
+            a, b, c = np.linalg.solve(ar_a, ar_b)
+
 
             # Compute gain reduction within the knee region
             gain_reduction_knee = a * amplitude_dB ** 2 + b * amplitude_dB + c
@@ -118,6 +123,7 @@ class AudioCompressor(AudioDynamics):
 
             # Ensure gain reduction is within [0, 1]
         gain_reduction = np.clip(desired_gain_reduction, 0.0, 1.0)
+        print(max(desired_gain_reduction))
         return gain_reduction
 
     def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
