@@ -123,7 +123,6 @@ class AudioCompressor(AudioDynamics):
 
             # Ensure gain reduction is within [0, 1]
         gain_reduction = np.clip(desired_gain_reduction, 0.0, 1.0)
-        print(max(desired_gain_reduction))
         return gain_reduction
 
     def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
