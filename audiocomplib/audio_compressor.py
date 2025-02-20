@@ -54,6 +54,8 @@ class AudioCompressor(AudioDynamics):
 
     def process(self, input_signal: np.ndarray, sample_rate: int) -> np.ndarray:
         result = super().process(input_signal, sample_rate)
+
+        # Calculate linear make-up gain and apply it to the output
         gain_k = 10 ** (self.makeup_gain / 20)
         return result * gain_k
 
@@ -67,12 +69,17 @@ class AudioCompressor(AudioDynamics):
         Returns:
             np.ndarray: The compression factor for each sample.
         """
-        knee_start = self.threshold - self.knee_width / 2
-        return np.where(
-            (amplitude_dB > knee_start) & (amplitude_dB < self.threshold),
-            1 + (self.ratio - 1) * ((amplitude_dB - knee_start) / self.knee_width),
-            np.where(amplitude_dB >= self.threshold, self.ratio, 1)
-        )
+        if self.knee_width == 0:
+            # Hard knee: no smooth transition, just apply ratio above threshold
+            return np.where(amplitude_dB >= self.threshold, self.ratio, 1)
+        else:
+            # Soft knee: apply smooth transition around the threshold
+            knee_start = self.threshold - self.knee_width / 2
+            return np.where(
+                (amplitude_dB > knee_start) & (amplitude_dB < self.threshold),
+                1 + (self.ratio - 1) * ((amplitude_dB - knee_start) / self.knee_width),
+                np.where(amplitude_dB >= self.threshold, self.ratio, 1)
+            )
 
     def _calculate_gain_reduction(self, signal: np.ndarray, sample_rate: int) -> np.ndarray:
         """
