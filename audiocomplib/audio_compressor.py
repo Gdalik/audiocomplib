@@ -1,6 +1,5 @@
 import numpy as np
 from .audio_dynamics import AudioDynamics
-from .smooth_gain_reduction_init import smooth_gain_reduction
 
 
 class AudioCompressor(AudioDynamics):
@@ -116,20 +115,3 @@ class AudioCompressor(AudioDynamics):
             # Ensure gain reduction is within [0, 1]
         gain_reduction = np.clip(desired_gain_reduction, 0.0, 1.0)
         return gain_reduction
-
-    def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
-        """
-        Calculate the gain reduction for the compressor.
-
-        Args:
-            signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
-
-        Returns:
-            np.ndarray: The gain reduction values to be applied to the signal.
-        """
-
-        target_gain_reduction = self.target_gain_reduction(signal).astype(dtype=np.float64)
-        self._gain_reduction = smooth_gain_reduction(target_gain_reduction, self.attack_coeff, self.release_coeff,
-                                                     last_gain_reduction=self._last_gain_reduction_loaded)
-
-        return self._gain_reduction

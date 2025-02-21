@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from .smooth_gain_reduction_init import smooth_gain_reduction
 
 
 class AudioDynamics(ABC):
@@ -182,7 +183,6 @@ class AudioDynamics(ABC):
         """
         pass
 
-    @abstractmethod
     def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
         """
         Calculate the gain reduction to be applied to the signal.
@@ -193,4 +193,8 @@ class AudioDynamics(ABC):
         Returns:
             np.ndarray: The gain reduction values to be applied to the signal.
         """
-        pass
+        gain_reduction = self.target_gain_reduction(signal)
+        self._gain_reduction = smooth_gain_reduction(gain_reduction.astype(np.float64), self.attack_coeff,
+                                                     self.release_coeff,
+                                                     last_gain_reduction=self._last_gain_reduction_loaded)
+        return self._gain_reduction

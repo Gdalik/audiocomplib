@@ -1,6 +1,5 @@
 import numpy as np
 from .audio_dynamics import AudioDynamics
-from .smooth_gain_reduction_init import smooth_gain_reduction
 
 
 class PeakLimiter(AudioDynamics):
@@ -33,20 +32,3 @@ class PeakLimiter(AudioDynamics):
         max_amplitude = np.maximum(max_amplitude, 1e-10)  # Ensure max_amplitude is never zero
 
         return np.where(max_amplitude > self.threshold_linear, self.threshold_linear / max_amplitude, 1.0)
-
-    def _calculate_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
-        """
-        Calculate the gain reduction for the peak limiter.
-
-        Args:
-            signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
-
-        Returns:
-            np.ndarray: The gain reduction values to be applied to the signal.
-        """
-        gain_reduction = self.target_gain_reduction(signal)
-        self._gain_reduction = smooth_gain_reduction(gain_reduction.astype(np.float64), self.attack_coeff,
-                                                     self.release_coeff,
-                                                     last_gain_reduction=self._last_gain_reduction_loaded)
-
-        return self._gain_reduction
