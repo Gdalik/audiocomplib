@@ -5,6 +5,7 @@ from collections.abc import Iterable
 import numpy as np
 from audiocomplib import AudioCompressor, PeakLimiter
 import matplotlib.pyplot as plt
+plt.switch_backend('TkAgg')
 
 
 def get_transfer_curve(effect: AudioCompressor or PeakLimiter, num_points=20, min_value=1e-10):
@@ -75,6 +76,8 @@ def plot_transfer_curve(effects: Iterable[list or tuple], labels, num_points=100
 
     plt.xlabel('Input (dB)')
     plt.ylabel('Output (dB)')
+    plt.xlim(-96, 0)
+    plt.ylim(-96, 0)
     plt.grid(True)
     plt.legend()
     plt.show()
@@ -84,7 +87,7 @@ if __name__ == '__main__':
     np.set_printoptions(suppress=True)
 
     # Create an AudioCompressor instance
-    Comp = AudioCompressor(threshold=-40, ratio=4, knee_width=5)
+    Comp = AudioCompressor(threshold=-40, ratio=4, knee_width=8)
     print(f'\nTransfer curve of audio compressor with '
           f'threshold={Comp.threshold}dB, ratio={Comp.ratio}:1, knee width={Comp.knee_width}dB:')
     print(f'\nLinear (Input, Output):\n{get_transfer_curve(Comp, num_points=20)}')

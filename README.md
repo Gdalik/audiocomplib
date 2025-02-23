@@ -2,6 +2,8 @@
 
 **Copyright (c) 2025, Gdaliy Garmiza**
 
+![Example of Audiocomplib Compressor and Limiter Transfer Curves](https://github.com/Gdalik/audiocomplib/blob/main/examples/Images/TransferCurve.png)
+
 This Python package provides two essential audio processing tools: **Audio Compressor** and **Peak Limiter**. These classes are designed for use in audio applications, scripts and libraries, and are implemented in Python with high performance in mind, including optional Cython-based optimizations.
 
 The library supports real-time mode, maintaining smooth transitions between audio chunks.
