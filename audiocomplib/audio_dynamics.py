@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from .smooth_gain_reduction_init import smooth_gain_reduction
+from typing import Optional
 
 
 class AudioDynamics(ABC):
@@ -19,9 +20,21 @@ class AudioDynamics(ABC):
         self.threshold = threshold
         self.attack_time_ms = attack_time_ms
         self.release_time_ms = release_time_ms
-        self._gain_reduction: np.ndarray | None = None
+        self._gain_reduction: Optional[np.ndarray] = None
         self._last_gain_reduction_loaded = None
         self._realtime = realtime
+
+    def reset(self):
+        """
+        Reset the internal state of the dynamics processor.
+
+        This clears any stored gain reduction values, which is particularly important:
+        - When processing a new audio stream
+        - When reusing the processor for different audio segments
+        - To ensure clean state between independent processing calls
+        """
+        self._last_gain_reduction_loaded = None
+        self._gain_reduction = None
 
     def set_threshold(self, threshold: float) -> None:
         """
@@ -73,7 +86,11 @@ class AudioDynamics(ABC):
         self._validate_input_signal(input_signal, sample_rate)
         last_gr = self.last_gain_reduction if self._realtime else None
         self._load_last_gain_reduction(last_gr)
-        self._calculate_gain_reduction(input_signal)
+        try:
+            self._calculate_gain_reduction(input_signal)
+        except IndexError:
+            self.reset()
+            return input_signal
         output_signal = input_signal * self._gain_reduction
 
         # Ensure that the data type of the output array is the same as the data type of the input array

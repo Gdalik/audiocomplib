@@ -167,15 +167,13 @@ Both `AudioCompressor` and `PeakLimiter` classes inherit from `AudioDynamics`, s
 - `get_gain_reduction()`: Returns the gain reduction curve as a numpy array of values in dB.
 - `target_gain_reduction(signal: np.ndarray)`: Returns the target (non-smoothed) gain reduction curve of given signal as a numpy array of linear values between 0 and 1. Useful for visualizations (see [example of computing and plotting transfer curves](https://github.com/Gdalik/audiocomplib/blob/main/examples/get_plot_transfer_curve.py)).
 - `set_realtime(realtime: bool)`: Enables or disables real-time processing mode.
+- `process(input_signal: np.ndarray, sample_rate: int)`: Process the input signal using the dynamics processor.
+- `reset()`: Reset the internal state of the dynamics processor.
 
 #### AudioCompressor Methods:
 - `set_ratio(ratio: float)`: Sets the compression ratio.
 - `set_knee_width(knee_width: float)`: Sets the knee width.
 - `set_makeup_gain(makeup_gain: float)`: Sets the make-up gain in dB.
-- `process(input_signal: np.ndarray, sample_rate: int)`: Applies compression to the input signal.
-
-#### PeakLimiter Methods:
-- `process(input_signal: np.ndarray, sample_rate: int)`: Applies peak limiting to the input signal.
 
 ### Enabling real-time mode
 
