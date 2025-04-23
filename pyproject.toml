@@ -14,7 +14,7 @@ description = "A Python library for audio dynamic compression and limiting"
 readme = "README.md"  # Path to your README file
 authors = [{name = "Gdaliy Garmiza", email = "gdalik@gmail.com"}]
 maintainers = [{name = "Gdaliy Garmiza", email = "gdalik@gmail.com"}]
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.9"
 classifiers = [
     "License :: OSI Approved :: MIT License",
