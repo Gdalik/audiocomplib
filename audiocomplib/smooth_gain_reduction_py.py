@@ -1,41 +1,50 @@
+"""
+Pure Python fallback for smooth_gain_reduction (v0.2.0).
+
+Identical behavior to Cython version.
+Expected performance: ~50-100ms per 1M samples (vs ~5ms for Cython).
+"""
+
 import numpy as np
 
 
-def smooth_gain_reduction(gain_reduction: np.ndarray, attack_coeff: float, release_coeff: float,
-                          last_gain_reduction=None) -> np.ndarray:
+def smooth_gain_reduction(
+    target_gain_reduction,
+    attack_time_ms,
+    release_times_ms,
+    sample_rate,
+    last_gain_reduction=1.0
+):
     """
-    Apply exponential smoothing for attack and release phases to the gain reduction array.
+    Smooth gain reduction with per-sample release times (Python fallback).
 
-    Args:
-        gain_reduction (np.ndarray): The input gain reduction values as a 1D array.
-        attack_coeff (float): The attack coefficient for smoothing.
-        release_coeff (float): The release coefficient for smoothing.
-        last_gain_reduction (float or None): The last gain reduction value from the previous chunk (if provided).
-
-    Returns:
-        np.ndarray: The smoothed gain reduction values.
+    See smooth_gain_reduction.pyx for full documentation.
     """
-    n = gain_reduction.shape[0]
-    smoothed_gain_reduction = np.empty_like(gain_reduction)  # Create a new array to store the smoothed values
+    n_samples = len(target_gain_reduction)
+    smoothed = np.zeros(n_samples, dtype=np.float64)
+    current_gain = last_gain_reduction
 
-    # Initialize the first sample
-    if last_gain_reduction is None:
-        # If no previous state is provided, start with the first input/target gain reduction value
-        smoothed_gain_reduction[0] = gain_reduction[0]
-    else:
-        # If previous state is provided, start smoothing from index 0
-        coeff = attack_coeff if gain_reduction[0] < last_gain_reduction else release_coeff
-        smoothed_gain_reduction[0] = coeff * last_gain_reduction + (1 - coeff) * gain_reduction[0]
+    # Pre-calculate attack coefficient
+    attack_samples = max(1, int(attack_time_ms * sample_rate / 1000.0))
+    attack_coeff = np.exp(-1.0 / attack_samples)
 
-    # Loop through the array to apply smoothing for attack and release phases
-    for i in range(1, n):
-        prev = smoothed_gain_reduction[i-1]
-        target = gain_reduction[i]
-        if target < prev:
-            # Attack phase: gain reduction is rising
-            smoothed_gain_reduction[i] = attack_coeff * prev + (1 - attack_coeff) * target
+    for i in range(n_samples):
+        # Calculate release coefficient
+        release_samples = max(1, int(release_times_ms[i] * sample_rate / 1000.0))
+        release_coeff = np.exp(-1.0 / release_samples)
+
+        # Attack or release
+        if target_gain_reduction[i] < current_gain:
+            current_gain = (
+                attack_coeff * current_gain
+                + (1 - attack_coeff) * target_gain_reduction[i]
+            )
         else:
-            # Release phase: gain reduction is falling
-            smoothed_gain_reduction[i] = release_coeff * prev + (1 - release_coeff) * target
+            current_gain = (
+                release_coeff * current_gain
+                + (1 - release_coeff) * target_gain_reduction[i]
+            )
 
-    return smoothed_gain_reduction
+        smoothed[i] = current_gain
+
+    return smoothed
