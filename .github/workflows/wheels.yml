@@ -1,6 +1,14 @@
 name: Build Wheels
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
 
 jobs:
   build_wheels:
@@ -27,7 +35,7 @@ jobs:
           python -m pip install cibuildwheel==2.22.0
           python -m pip install setuptools wheel cython
 
-      # Set cibuildwheel skip filter (skip pp39-macosx_arm64)
+      # Skip pp39-macosx_arm64
       - name: Set environment for cibuildwheel
         run: echo "CIBW_SKIP=pp39-macosx_arm64" >> $GITHUB_ENV
 
