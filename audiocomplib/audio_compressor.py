@@ -1,117 +1,128 @@
+"""
+Audio compressor with optional depth-based variable release (v0.2.0).
+
+Reduces dynamic range by applying a compression ratio above threshold.
+Combines soft-knee for musicality with optional depth-based variable release.
+"""
+
 import numpy as np
 from .audio_dynamics import AudioDynamics
 
 
 class AudioCompressor(AudioDynamics):
-    """Audio compressor for dynamic range compression."""
+    """
+    Audio compressor with optional depth-based variable release.
 
-    def __init__(self, threshold: float = -10.0, ratio: float = 4.0, attack_time_ms: float = 1.0,
-                 release_time_ms: float = 100.0, knee_width: float = 3.0, makeup_gain: float = 0.0, realtime=False):
+    Reduces dynamic range by applying a compression ratio to signals exceeding
+    the threshold. Features soft-knee for smooth, musical compression and optional
+    depth-based variable release (deeper compression = slower release).
+
+    COMPRESSION ALGORITHM:
+        - Below threshold: no processing (unity gain)
+        - Above threshold: gain reduction = (input - threshold) / ratio
+        - Soft-knee: smooth quadratic transition (optional)
+        - Variable release: scales with compression depth (optional)
+        - Makeup gain: post-compression level compensation
+
+    Example:
+        compressor = AudioCompressor(threshold=-10.0, ratio=4.0, variable_release=True)
+        output = compressor.process(audio, sample_rate=48000)
+    """
+
+    def __init__(
+            self,
+            threshold: float = -10.0,
+            ratio: float = 4.0,
+            attack_time_ms: float = 1.0,
+            release_time_ms: float = 100.0,
+            knee_width: float = 3.0,
+            makeup_gain: float = 0.0,
+            realtime: bool = False,
+            variable_release: bool = True,
+            max_release_multiplier: float = 2.0
+    ):
         """
-        Initialize the audio compressor.
+        Initialize audio compressor.
 
         Args:
-            threshold (float): The threshold level in dB. Defaults to -10.0.
-            ratio (float): The compression ratio. Defaults to 4.0.
-            attack_time_ms (float): The attack time in milliseconds. Defaults to 1.0.
-            release_time_ms (float): The release time in milliseconds. Defaults to 100.0.
-            knee_width (float): The knee width in dB for soft knee compression. Defaults to 3.0.
-            makeup_gain (float): The make-up gain in dB. Defaults to 0.0
-            realtime (bool): True if the effect is used for real-time processing (in chunks). Defaults to False.
+            threshold (float): Compression threshold in dBFS. Default: -10.0.
+            ratio (float): Compression ratio (e.g., 4.0 = 4:1). Default: 4.0.
+            attack_time_ms (float): Attack time in milliseconds. Default: 1.0.
+            release_time_ms (float): Base release time in milliseconds. Default: 100.0.
+                With variable_release=True: scales with compression depth.
+            knee_width (float): Soft-knee width in dB. Default: 3.0 (0 = hard knee).
+            makeup_gain (float): Makeup gain in dB. Default: 0.0.
+            realtime (bool): Real-time mode. Default: False.
+            variable_release (bool): Enable depth-based variable release. Default: True.
+            max_release_multiplier (float): Max release multiplier. Default: 2.0.
         """
-        super().__init__(threshold, attack_time_ms, release_time_ms, realtime=realtime)
+        super().__init__(
+            threshold,
+            attack_time_ms,
+            release_time_ms,
+            realtime=realtime,
+            variable_release=variable_release,
+            max_release_multiplier=max_release_multiplier
+        )
         self.ratio = ratio
         self.knee_width = knee_width
         self.makeup_gain = makeup_gain
 
     def set_ratio(self, ratio: float) -> None:
-        """
-        Set the compression ratio.
-
-        Args:
-            ratio (float): The new compression ratio.
-        """
+        """Set compression ratio (e.g., 4.0 for 4:1)."""
         self.ratio = ratio
 
     def set_knee_width(self, knee_width: float) -> None:
-        """
-        Set the knee width for soft knee compression.
-
-        Args:
-            knee_width (float): The new knee width in dB.
-        """
+        """Set soft-knee width in dB (0 = hard knee)."""
         self.knee_width = knee_width
 
     def set_makeup_gain(self, makeup_gain: float) -> None:
-        """
-        Set the make-up gain after the compression
-
-        Args:
-             makeup_gain (float): The new make-up gain in dB.
-        """
+        """Set makeup gain in dB (applied after compression)."""
         self.makeup_gain = makeup_gain
-
-    def process(self, input_signal: np.ndarray, sample_rate: int) -> np.ndarray:
-        result = super().process(input_signal, sample_rate)
-
-        # Calculate linear make-up gain and apply it to the output
-        gain_k = 10 ** (self.makeup_gain / 20)
-        return result * gain_k
 
     def target_gain_reduction(self, signal: np.ndarray) -> np.ndarray:
         """
-        Calculate the target gain reduction before attack/release smoothing for compressor.
+        Calculate instantaneous compression gain curve (pre-smoothing).
 
         Args:
-            signal (np.ndarray): The input signal as a 2D array with shape (channels, samples).
+            signal (np.ndarray): Input, shape (channels, samples).
 
         Returns:
-            np.ndarray: The linear gain reduction values between 0 and 1.
+            Linear gain (0-1), shape (samples,).
         """
-        # Compute the maximum amplitude of the signal
         max_amplitude = self._compute_max_amplitude(signal)
-        max_amplitude = np.maximum(max_amplitude, 1e-10)  # Ensure max_amplitude is never zero
+        max_amplitude = np.maximum(max_amplitude, 1e-10)
+        amplitude_dB = 20 * np.log10(max_amplitude)
 
-        # Convert amplitude to dB
-        amplitude_dB = 20 * np.log10(max_amplitude)  # Avoid log(0) since max_amplitude is >= 1e-10
-
-        # Conditions for soft knee region
-        knee_start = self.threshold - self.knee_width / 2
-        knee_end = self.threshold + self.knee_width / 2
-        in_soft_knee = (amplitude_dB > knee_start) & (amplitude_dB < knee_end)
-
-        # Compute desired gain reduction
         if self.knee_width == 0:
-            # Hard knee: no smooth transition, just apply ratio above threshold
-            desired_gain_reduction = np.where(
+            # Hard knee compression
+            output_dB = np.where(
                 amplitude_dB > self.threshold,
-                (max_amplitude / self.threshold_linear) ** (1 / self.ratio - 1),
-                1.0
+                self.threshold + (amplitude_dB - self.threshold) / self.ratio,
+                amplitude_dB
             )
         else:
-            # Soft knee: apply the soft knee equation within the knee region
-            # y = x + ((1 / R - 1) * (x - T + W/2)^2) / (2 * W)
-            x = amplitude_dB
-            T = self.threshold
-            W = self.knee_width
-            R = self.ratio
-
-            # Compute output level in dB for the soft knee region
-            output_dB_soft_knee = x + ((1 / R - 1) * (x - T + W / 2) ** 2) / (2 * W)
-
-            # Convert output level back to linear scale
-            output_linear_soft_knee = 10 ** (output_dB_soft_knee / 20)
-
-            # Compute gain reduction in the soft knee region
-            gain_reduction_soft_knee = output_linear_soft_knee / max_amplitude
-
-            # Apply gain reduction
-            desired_gain_reduction = np.where(
-                in_soft_knee,
-                gain_reduction_soft_knee,
-                np.where(amplitude_dB >= knee_end, (max_amplitude / self.threshold_linear) ** (1 / self.ratio - 1), 1.0)
+            # Soft-knee compression
+            output_dB = self._apply_soft_knee_compression(
+                amplitude_dB, self.threshold, self.knee_width, self.ratio
             )
 
-            # Ensure gain reduction is within [0, 1]
-        gain_reduction = np.clip(desired_gain_reduction, 0.0, 1.0)
-        return gain_reduction
+        output_linear = 10 ** (output_dB / 20)
+        return np.clip(output_linear / max_amplitude, 0.0, 1.0)
+
+    def process(self, input_signal: np.ndarray, sample_rate: int) -> np.ndarray:
+        """
+        Process audio through compressor with makeup gain.
+
+        Args:
+            input_signal (np.ndarray): Audio, shape (channels, samples).
+            sample_rate (int): Sample rate in Hz.
+
+        Returns:
+            Compressed audio with makeup gain applied.
+        """
+        result = super().process(input_signal, sample_rate)
+
+        # Apply makeup gain
+        gain_linear = 10 ** (self.makeup_gain / 20)
+        return result * gain_linear
